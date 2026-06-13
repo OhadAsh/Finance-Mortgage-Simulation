@@ -1,35 +1,35 @@
-# סימולטור נכסים ומשכנתא
+# Assets & Mortgage Simulator
 
-אפליקציית ווב לתכנון פיננסי אישי — סימולציית תזרים, משכנתא ותרחישי הכנסה, עם תובנות AI אופציונליות.
+A client-side web app for personal financial planning — cash-flow simulation, mortgage modeling, income scenarios, and optional AI insights.
 
-**דמו חי:** [ohadash.github.io/Finance-Mortgage-Simulation](https://ohadash.github.io/Finance-Mortgage-Simulation/)
-
----
-
-## מה האפליקציה עושה
-
-- **ניהול נכסים** — הוספה, עריכה, מחיקה וייבוא מ-Excel
-- **משכנתא** — שווי דירה, הון עצמי, ריבית, מועד כניסה
-- **תרחישי הכנסה** — שלושה פרופילים (מלא / חלקי / מינימלי) עם הכנסה ראשית ומשנית
-- **גרפים** — נכסים, הון עצמי נטו, מד LTV לאורך 30 חודשים
-- **תובנות AI** — שאלות מוכנות ושאלה חופשית (דרך OpenRouter, אופציונלי)
-- **שמירה מקומית** — כל הנתונים נשמרים ב-`localStorage` בדפדפן בלבד
-- **ייצוא** — דוח PDF עם גרפים, או Excel עם הנתונים כפי שהוזנו (חסכונות / משכנתא / תרחישים)
-
-> **פרטיות:** אין שרת. הנתונים שלך לא עולים לשום מקום (מלבד קריאות AI אם תזין מפתח API).
+**Live demo:** [ohadash.github.io/Finance-Mortgage-Simulation](https://ohadash.github.io/Finance-Mortgage-Simulation/)
 
 ---
 
-## התחלה מהירה
+## Features
 
-### שימוש באתר (ללא התקנה)
+- **Asset management** — add, edit, delete, and import from Excel
+- **Mortgage** — apartment value, equity, interest rate, move-in month
+- **Income scenarios** — three profiles (full / partial / minimal) with primary and secondary income
+- **Charts** — assets, net equity, and LTV over 30 months
+- **AI insights** — preset prompts and free-text questions (via OpenRouter, optional)
+- **Local persistence** — all data stays in browser `localStorage` only
+- **Export** — PDF report with charts, or Excel with data as entered (savings / mortgage / scenarios)
 
-1. היכנס ל-[הדמו החי](https://ohadash.github.io/Finance-Mortgage-Simulation/)
-2. הוסף נכסים ידנית או ייבא מ-Excel (ראה למטה)
-3. מלא פרמטרי משכנתא ותרחיש הכנסה
-4. עקוב אחרי הגרפים והמדדים
+> **Privacy:** No backend. Your data never leaves the browser (except AI API calls if you add a key).
 
-### הרצה מקומית
+---
+
+## Quick start
+
+### Use the live site (no install)
+
+1. Open the [live demo](https://ohadash.github.io/Finance-Mortgage-Simulation/)
+2. Add assets manually or import from Excel (see below)
+3. Fill in mortgage parameters and an income scenario
+4. Review charts and metrics
+
+### Run locally
 
 ```bash
 git clone https://github.com/OhadAsh/Finance-Mortgage-Simulation.git
@@ -38,9 +38,9 @@ npm install
 npm run dev
 ```
 
-האפליקציה תיפתח בכתובת `http://localhost:5173`
+The app runs at `http://localhost:5173`
 
-### בנייה לפרודקשן
+### Production build
 
 ```bash
 npm run build
@@ -49,86 +49,86 @@ npm run preview
 
 ---
 
-## ייבוא נכסים — Excel
+## Importing assets — Excel
 
-האפליקציה תומכת ב-**Excel (`.xlsx`)** בלבד.
+The app supports **Excel (`.xlsx`)** only.
 
-### תבנית מוכנה
+### Template
 
 [assets-template.xlsx](public/assets-template.xlsx)
 
-מהאתר החי: `https://ohadash.github.io/Finance-Mortgage-Simulation/assets-template.xlsx`
+From the live site: `https://ohadash.github.io/Finance-Mortgage-Simulation/assets-template.xlsx`
 
 ---
 
-### פורמט הגיליון (`חסכונות`)
+### Sheet format (`חסכונות`)
 
-מבנה טבלאי — **עמודה לכל שותף**:
+Tabular layout — **one column per partner**:
 
-| מוצר/שם | שותף א׳ | שותף ב׳ | נזיל/לא נזיל | הערות |
-|---------|---------|---------|--------------|--------|
+| מוצר/שם (product) | שותף א׳ (partner A) | שותף ב׳ (partner B) | נזיל/לא נזיל (liquidity) | הערות (notes) |
+|-------------------|---------------------|---------------------|--------------------------|---------------|
 | קרן השתלמות | 150000 | 120000 | לא נזיל | נפתח בעתיד |
 | עובר ושב | 25000 | 8000 | נזיל | |
 
-**כללים:**
-- שורת כותרות ראשונה — שמות העמודות כמתואר
-- עמודות השותפים: כל עמודה עם סכום > 0 הופכת לנכס נפרד
-- `נזיל` → נזיל | `לא נזיל` → חצי נזיל
-- אם בהערות מופיע **"לא כולל מיסים"** — מס 25% מוחל אוטומטית
-- שורות סיכום (`סך הכל`, `ביחד` וכו') מדולגות אוטומטית
-- ניתן להוסיף עמודות שותפים נוספות (שותף ג׳, שותף ד׳...)
+**Rules:**
+- First row is the header (Hebrew column names as shown)
+- Partner columns: each cell with amount > 0 becomes a separate asset
+- `נזיל` → liquid | `לא נזיל` → semi-liquid
+- If notes contain **"לא כולל מיסים"** — 25% tax is applied automatically
+- Summary rows (`סך הכל`, `ביחד`, etc.) are skipped automatically
+- You can add more partner columns (partner C, D, …)
 
-**שימוש:**
-1. הורד `assets-template.xlsx` או שכפל את המבנה בקובץ קיים
-2. מלא נתונים בגיליון **חסכונות** (או בגיליון הראשון)
-3. באפליקציה: **נכסים פיננסיים → ייבוא Excel**
-4. בחר **החלף הכל** או **מזג**
-
----
-
-## תובנות AI (אופציונלי)
-
-1. צור מפתח ב-[OpenRouter](https://openrouter.ai/)
-2. באפליקציה: לחץ **מפתח API** והדבק את המפתח
-3. המפתח נשמר רק בדפדפן שלך
-4. בחר שאלה מוכנה או כתוב שאלה חופשית
+**Usage:**
+1. Download `assets-template.xlsx` or copy the structure into your own file
+2. Fill data on the **חסכונות** sheet (or the first sheet)
+3. In the app: **Financial assets → Import Excel**
+4. Choose **Replace all** or **Merge**
 
 ---
 
-## פריסה ל-GitHub Pages
+## AI insights (optional)
 
-הריפו כולל workflow אוטומטי (`.github/workflows/deploy.yml`).
-
-1. דחוף לענף `main`
-2. ב-GitHub: **Settings → Pages → Source:** Deploy from branch → `gh-pages` / root
-3. האתר יתעדכן אוטומטית בכל push
+1. Create a key at [OpenRouter](https://openrouter.ai/)
+2. In the app: click **API Key** and paste it
+3. The key is stored only in your browser
+4. Pick a preset question or ask your own
 
 ---
 
-## טכנולוגיות
+## Deploy to GitHub Pages
+
+The repo includes an automated workflow (`.github/workflows/deploy.yml`).
+
+1. Push to the `main` branch
+2. On GitHub: **Settings → Pages → Source:** Deploy from branch → `gh-pages` / root
+3. The site updates automatically on every push
+
+---
+
+## Tech stack
 
 - React 18 + TypeScript + Vite
 - Tailwind CSS
 - Zustand (state + persist)
-- Recharts (גרפים)
+- Recharts (charts)
 - SheetJS / xlsx (Excel)
 - OpenRouter API (AI)
 
 ---
 
-## מבנה הפרויקט
+## Project structure
 
 ```
 src/
-├── components/   # UI — נכסים, משכנתא, תרחישים, גרפים, AI
-├── hooks/        # useSimulation, useAiInsights
-├── lib/          # calculations, excelParser, aiInsights
+├── components/   # UI — assets, mortgage, scenarios, charts, AI
+├── hooks/        # useSimulation, useAiInsights, useExportReport
+├── lib/          # calculations, excelParser, exportReport, aiInsights
 ├── store/        # Zustand stores
 └── types/        # TypeScript interfaces
 ```
 
 ---
 
-## רישיון
+## License
 
-פרויקט קוד פתוח לשימוש אישי ולמידה.
+Open source for personal use and learning.
