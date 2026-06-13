@@ -1,0 +1,82 @@
+# Cursor Rules — Financial Simulator (Hebrew, React, GitHub Pages)
+
+## Core behavior
+- Never ask clarifying questions. Make the best decision and proceed.
+- Always implement the full feature end-to-end before moving to the next file.
+- Never leave TODO comments or placeholder implementations.
+- If something is ambiguous, choose the most production-ready approach.
+
+## Language & locale
+- All UI strings must be in Hebrew.
+- All components must work in RTL layout (dir="rtl").
+- Format currency as ₪X,XXX using he-IL locale.
+- Date labels in Hebrew short format: "יול 26", "אוג 26" etc.
+
+## TypeScript
+- Strict mode only. No `any` types ever.
+- All props must have explicit TypeScript interfaces.
+- All function return types must be explicitly declared.
+- Use `unknown` instead of `any` when type is uncertain.
+
+## React
+- Functional components only. No class components.
+- All state via Zustand stores — no prop drilling beyond 1 level.
+- Custom hooks for all business logic (calculations, AI calls, simulations).
+- Never put calculation logic inside components — always in lib/ or hooks/.
+
+## Styling
+- Tailwind CSS only. No inline styles. No CSS modules. No styled-components.
+- Dark theme: background #0F172A, cards #1E293B, accent green #10B981.
+- Mobile-first responsive. Single column on mobile, 2-column on desktop.
+- Use Heebo font for Hebrew text, Inter for numbers and Latin.
+
+## State & persistence
+- All Zustand stores must use the `persist` middleware with localStorage.
+- Never store sensitive data (API keys) anywhere except localStorage under a clearly named key.
+- Always initialize stores with the default asset values defined in the prompt.
+
+## Charts (Recharts)
+- All charts must be wrapped in ResponsiveContainer.
+- All tooltips must display values in Hebrew with ₪ formatting.
+- Charts must animate on mount (use Recharts animationDuration={800}).
+
+## File structure — never deviate from this
+src/
+  types/index.ts
+  lib/calculations.ts
+  lib/csvParser.ts
+  lib/aiInsights.ts
+  store/useAssetsStore.ts
+  store/useMortgageStore.ts
+  store/useSettingsStore.ts
+  components/ui/         ← primitive components only
+  components/assets/
+  components/mortgage/
+  components/charts/
+  components/scenarios/
+  components/insights/
+  components/layout/
+  hooks/
+
+## AI integration
+- The Anthropic API call must always use model "claude-sonnet-4-6".
+- API key must only be read from localStorage — never hardcoded, never in env files.
+- Always handle: loading state, error state, empty state in InsightsPanel.
+- The AI prompt must include the full financial state as structured JSON.
+
+## GitHub Pages compatibility
+- vite.config.ts must always have base: './'
+- All asset imports must use relative paths.
+- No server-side code of any kind.
+- Build output must go to /dist.
+
+## CSV import
+- Always validate columns before importing.
+- Always show a preview before confirming import.
+- Accept both Hebrew and English values in the נזילות column.
+- On parse error, show a clear Hebrew error message — never crash silently.
+
+## When editing existing files
+- Always read the full file before making changes.
+- Never remove existing functionality when adding new features.
+- Keep all existing TypeScript interfaces intact unless explicitly told to change them.

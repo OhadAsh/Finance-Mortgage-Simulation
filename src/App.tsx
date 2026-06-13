@@ -1,0 +1,53 @@
+import { useState } from 'react';
+import { Header } from './components/layout/Header';
+import { Sidebar } from './components/layout/Sidebar';
+import { AssetTable } from './components/assets/AssetTable';
+import { MortgagePanel } from './components/mortgage/MortgagePanel';
+import { ScenarioTabs } from './components/scenarios/ScenarioTabs';
+import { MainChart } from './components/charts/MainChart';
+import { EquityChart } from './components/charts/EquityChart';
+import { LtvGauge } from './components/charts/LtvGauge';
+import { InsightsPanel } from './components/insights/InsightsPanel';
+import { ApiKeyModal } from './components/insights/ApiKeyModal';
+import { useSimulation } from './hooks/useSimulation';
+
+export function App() {
+  const { chartData, currentLtv, netEquity } = useSimulation();
+  const [apiModalOpen, setApiModalOpen] = useState(false);
+
+  return (
+    <div className="min-h-screen bg-navy">
+      <Header onApiKeyClick={() => setApiModalOpen(true)} />
+
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+        <div className="mb-6 lg:hidden">
+          <Sidebar ltv={currentLtv} netEquity={netEquity} />
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+          <div className="space-y-6 lg:col-span-5">
+            <AssetTable />
+            <MortgagePanel />
+            <ScenarioTabs />
+          </div>
+
+          <div className="space-y-6 lg:col-span-7">
+            <div className="hidden lg:block">
+              <Sidebar ltv={currentLtv} netEquity={netEquity} />
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="sm:col-span-2">
+                <MainChart data={chartData} />
+              </div>
+              <LtvGauge value={currentLtv} />
+            </div>
+            <EquityChart data={chartData} />
+            <InsightsPanel />
+          </div>
+        </div>
+      </main>
+
+      <ApiKeyModal isOpen={apiModalOpen} onClose={() => setApiModalOpen(false)} />
+    </div>
+  );
+}
