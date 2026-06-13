@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Key, Shield, ExternalLink } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { Alert } from '../ui/Alert';
@@ -15,6 +15,12 @@ export function ApiKeyModal({ isOpen, onClose }: ApiKeyModalProps) {
   const setApiKey = useSettingsStore((s) => s.setApiKey);
   const clearApiKey = useSettingsStore((s) => s.clearApiKey);
   const [input, setInput] = useState(apiKey ?? '');
+
+  useEffect(() => {
+    if (isOpen) {
+      setInput(apiKey ?? '');
+    }
+  }, [isOpen, apiKey]);
 
   const handleSave = () => {
     if (input.trim()) {

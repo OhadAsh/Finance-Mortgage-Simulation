@@ -1,7 +1,6 @@
 import { useState, type KeyboardEvent } from 'react';
 import { Sparkles, Loader2, Key, Send, Bot, MessageSquare } from 'lucide-react';
 import { Alert } from '../ui/Alert';
-import { ApiKeyModal } from './ApiKeyModal';
 import { PromptTemplates } from './PromptTemplates';
 import { useAiInsights } from '../../hooks/useAiInsights';
 import type { PromptTemplate } from '../../lib/promptTemplates';
@@ -17,7 +16,11 @@ function ResponseSkeleton() {
   );
 }
 
-export function InsightsPanel() {
+interface InsightsPanelProps {
+  onRequestApiKey: () => void;
+}
+
+export function InsightsPanel({ onRequestApiKey }: InsightsPanelProps) {
   const {
     text,
     loading,
@@ -31,13 +34,12 @@ export function InsightsPanel() {
     scenario,
   } = useAiInsights();
 
-  const [apiModalOpen, setApiModalOpen] = useState(false);
   const [freeText, setFreeText] = useState('');
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
 
   const ensureApiKey = (): boolean => {
     if (!hasApiKey) {
-      setApiModalOpen(true);
+      onRequestApiKey();
       return false;
     }
     return true;
@@ -76,7 +78,7 @@ export function InsightsPanel() {
         </div>
         <button
           type="button"
-          onClick={() => setApiModalOpen(true)}
+          onClick={onRequestApiKey}
           className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-card px-3 py-1.5 text-xs font-medium text-slate-300 transition-colors hover:border-accent hover:text-white"
         >
           <Key className="h-3.5 w-3.5" />
@@ -101,7 +103,7 @@ export function InsightsPanel() {
               </p>
               <button
                 type="button"
-                onClick={() => setApiModalOpen(true)}
+                onClick={onRequestApiKey}
                 className="flex items-center gap-2 rounded-lg bg-accent/15 px-4 py-2 text-sm font-medium text-accent transition-colors hover:bg-accent/25"
               >
                 <Key className="h-4 w-4" />
@@ -113,9 +115,9 @@ export function InsightsPanel() {
       </div>
 
       <div className="space-y-1.5">
-        <div className="flex items-end gap-2">
+        <div className="flex items-center gap-2">
           <div className="relative min-w-0 flex-1">
-            <MessageSquare className="pointer-events-none absolute right-3 top-3 h-4 w-4 text-slate-500" />
+            <MessageSquare className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
             <textarea
               value={freeText}
               onChange={(e) => setFreeText(e.target.value)}
@@ -123,7 +125,7 @@ export function InsightsPanel() {
               rows={2}
               placeholder="שאל שאלה חופשית על המצב הפיננסי שלך..."
               disabled={loading}
-              className="w-full resize-none rounded-xl border border-slate-700 bg-card py-3 pl-3 pr-10 text-sm text-white outline-none transition-colors placeholder:text-slate-500 focus:border-accent disabled:opacity-50"
+              className="min-h-11 w-full resize-none rounded-xl border border-slate-700 bg-card py-2.5 pl-3 pr-10 text-sm leading-relaxed text-white outline-none transition-colors placeholder:text-slate-500 focus:border-accent disabled:opacity-50"
             />
           </div>
           <button
@@ -131,7 +133,7 @@ export function InsightsPanel() {
             onClick={handleFreeTextSubmit}
             disabled={loading || !freeText.trim()}
             aria-label="שלח שאלה"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent text-white transition-colors hover:bg-accent/80 disabled:opacity-50"
+            className="flex h-11 w-11 shrink-0 items-center justify-center self-center rounded-xl bg-accent text-white transition-colors hover:bg-accent/80 disabled:opacity-50"
           >
             {loading && !selectedTemplateId ? (
               <Loader2 className="h-5 w-5 animate-spin" />
@@ -182,7 +184,6 @@ export function InsightsPanel() {
         </div>
       )}
 
-      <ApiKeyModal isOpen={apiModalOpen} onClose={() => setApiModalOpen(false)} />
     </section>
   );
 }

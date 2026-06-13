@@ -59,7 +59,7 @@ export function App() {
               <LtvGauge value={currentLtv} />
             </div>
             <EquityChart data={chartData} />
-            <InsightsPanel />
+            <InsightsPanel onRequestApiKey={() => setApiModalOpen(true)} />
           </div>
         </div>
       </main>
