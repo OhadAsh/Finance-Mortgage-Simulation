@@ -33,7 +33,7 @@ export function AssetTable() {
             className="flex items-center gap-1.5 rounded-lg border border-slate-600 px-3 py-1.5 text-sm text-slate-300 transition-colors hover:border-accent hover:text-accent"
           >
             <FileUp className="h-4 w-4" />
-            ייבוא CSV
+            ייבוא Excel
           </button>
           <button
             type="button"

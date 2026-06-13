@@ -1,13 +1,16 @@
-import { Building2, Key } from 'lucide-react';
+import { Building2, Key, FileSpreadsheet, FileText, Loader2 } from 'lucide-react';
 
 interface HeaderProps {
   onApiKeyClick: () => void;
+  onExportXlsx: () => void;
+  onExportPdf: () => void;
+  exporting: boolean;
 }
 
-export function Header({ onApiKeyClick }: HeaderProps) {
+export function Header({ onApiKeyClick, onExportXlsx, onExportPdf, exporting }: HeaderProps) {
   return (
     <header className="border-b border-slate-700/50 bg-card/50 backdrop-blur-sm">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10">
             <Building2 className="h-5 w-5 text-accent" />
@@ -19,14 +22,41 @@ export function Header({ onApiKeyClick }: HeaderProps) {
             <p className="text-xs text-slate-500">תכנון פיננסי אישי</p>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={onApiKeyClick}
-          className="flex items-center gap-1.5 rounded-lg border border-slate-600 px-3 py-2 text-sm text-slate-300 transition-colors hover:border-accent hover:text-accent"
-        >
-          <Key className="h-4 w-4" />
-          <span className="hidden sm:inline">מפתח API</span>
-        </button>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onExportXlsx}
+            disabled={exporting}
+            className="flex items-center gap-1.5 rounded-lg border border-slate-600 px-3 py-2 text-sm text-slate-300 transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
+            title="ייצוא Excel"
+          >
+            <FileSpreadsheet className="h-4 w-4" />
+            <span className="hidden sm:inline">Excel</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => void onExportPdf()}
+            disabled={exporting}
+            className="flex items-center gap-1.5 rounded-lg border border-slate-600 px-3 py-2 text-sm text-slate-300 transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
+            title="ייצוא PDF"
+          >
+            {exporting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <FileText className="h-4 w-4" />
+            )}
+            <span className="hidden sm:inline">PDF</span>
+          </button>
+          <button
+            type="button"
+            onClick={onApiKeyClick}
+            className="flex items-center gap-1.5 rounded-lg border border-slate-600 px-3 py-2 text-sm text-slate-300 transition-colors hover:border-accent hover:text-accent"
+          >
+            <Key className="h-4 w-4" />
+            <span className="hidden sm:inline">מפתח API</span>
+          </button>
+        </div>
       </div>
     </header>
   );

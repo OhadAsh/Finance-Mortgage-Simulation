@@ -10,18 +10,30 @@ import { LtvGauge } from './components/charts/LtvGauge';
 import { InsightsPanel } from './components/insights/InsightsPanel';
 import { ApiKeyModal } from './components/insights/ApiKeyModal';
 import { useSimulation } from './hooks/useSimulation';
+import { useExportReport } from './hooks/useExportReport';
 
 export function App() {
-  const { chartData, currentLtv, netEquity } = useSimulation();
+  const { chartData, currentLtv, netEquity, savingsNet, entryMonthLabel } = useSimulation();
+  const { exportXlsx, exportPdf, exporting } = useExportReport();
   const [apiModalOpen, setApiModalOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-navy">
-      <Header onApiKeyClick={() => setApiModalOpen(true)} />
+      <Header
+        onApiKeyClick={() => setApiModalOpen(true)}
+        onExportXlsx={exportXlsx}
+        onExportPdf={exportPdf}
+        exporting={exporting}
+      />
 
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
         <div className="mb-6 lg:hidden">
-          <Sidebar ltv={currentLtv} netEquity={netEquity} />
+          <Sidebar
+            ltv={currentLtv}
+            netEquity={netEquity}
+            savingsNet={savingsNet}
+            entryMonthLabel={entryMonthLabel}
+          />
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
@@ -33,7 +45,12 @@ export function App() {
 
           <div className="space-y-6 lg:col-span-7">
             <div className="hidden lg:block">
-              <Sidebar ltv={currentLtv} netEquity={netEquity} />
+              <Sidebar
+                ltv={currentLtv}
+                netEquity={netEquity}
+                savingsNet={savingsNet}
+                entryMonthLabel={entryMonthLabel}
+              />
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="sm:col-span-2">

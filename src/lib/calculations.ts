@@ -190,3 +190,16 @@ export function getLatestLtv(points: ChartPoint[]): number {
 export function getLatestNetEquity(points: ChartPoint[]): number {
   return points[points.length - 1]?.netEquity ?? 0;
 }
+
+export function getMetricAtMonth(
+  points: ChartPoint[],
+  monthIndex: number,
+): { netEquity: number; ltv: number; month: string } {
+  const clamped = Math.max(0, Math.min(monthIndex, points.length - 1));
+  const point = points[clamped];
+  return {
+    netEquity: point?.netEquity ?? 0,
+    ltv: point?.ltv ?? 0,
+    month: point?.month ?? '',
+  };
+}

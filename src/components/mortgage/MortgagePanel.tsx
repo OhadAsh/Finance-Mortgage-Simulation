@@ -6,6 +6,12 @@ import { Slider } from '../ui/Slider';
 import { NumberField } from '../ui/NumberField';
 import { MortgageSummary } from './MortgageSummary';
 
+function FieldLabel({ children }: { children: string }) {
+  return (
+    <p className="mb-1 min-h-[1rem] text-xs leading-tight text-slate-500">{children}</p>
+  );
+}
+
 interface EquityFieldProps {
   label: string;
   amount: number;
@@ -26,14 +32,12 @@ function EquityField({
   onResetAuto,
 }: EquityFieldProps) {
   return (
-    <div className="rounded-xl border border-slate-700 bg-card p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-slate-400">{label}</p>
+    <div className="flex h-full flex-col gap-3 rounded-xl border border-slate-700 bg-card p-4">
+      <div className="flex min-h-[1.5rem] items-center justify-between gap-2">
+        <p className="text-sm font-medium text-slate-300">{label}</p>
         <span
-          className={`rounded-full px-2 py-0.5 text-xs ${
-            isManual
-              ? 'bg-amber/20 text-amber'
-              : 'bg-accent/20 text-accent'
+          className={`shrink-0 rounded-full px-2 py-0.5 text-xs ${
+            isManual ? 'bg-amber/20 text-amber' : 'bg-accent/20 text-accent'
           }`}
         >
           {isManual ? 'ידני' : 'אוטומטי'}
@@ -41,33 +45,27 @@ function EquityField({
       </div>
 
       <div>
-        <p className="mb-1 text-xs text-slate-500">סכום (₪)</p>
-        <NumberField
-          value={amount}
-          onChange={onAmountChange}
-          prefix="₪"
-        />
+        <FieldLabel>סכום (₪)</FieldLabel>
+        <NumberField value={amount} onChange={onAmountChange} prefix="₪" />
       </div>
 
       <div>
-        <p className="mb-1 text-xs text-slate-500">אחוז משווי דירה</p>
-        <NumberField
-          value={percent}
-          onChange={onPercentChange}
-          suffix="%"
-        />
+        <FieldLabel>אחוז משווי דירה</FieldLabel>
+        <NumberField value={percent} onChange={onPercentChange} suffix="%" />
       </div>
 
-      {isManual && (
-        <button
-          type="button"
-          onClick={onResetAuto}
-          className="flex items-center gap-1 text-xs text-accent hover:underline"
-        >
-          <RotateCcw className="h-3 w-3" />
-          חזור לחישוב אוטומטי
-        </button>
-      )}
+      <div className="min-h-[1.25rem]">
+        {isManual && (
+          <button
+            type="button"
+            onClick={onResetAuto}
+            className="flex items-center gap-1 text-xs text-accent hover:underline"
+          >
+            <RotateCcw className="h-3 w-3" />
+            חזור לחישוב אוטומטי
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -85,14 +83,28 @@ export function MortgagePanel() {
         <h2 className="text-lg font-semibold text-white">פרמטרי משכנתא</h2>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div className="rounded-xl border border-slate-700 bg-card p-4 space-y-2">
-          <p className="text-xs text-slate-400">שווי דירה</p>
-          <NumberField
-            value={mortgage.apartmentValue}
-            onChange={(v) => setField({ apartmentValue: v })}
-            prefix="₪"
-          />
+      <div className="grid grid-cols-1 items-stretch gap-3 sm:grid-cols-3">
+        <div className="flex h-full flex-col gap-3 rounded-xl border border-slate-700 bg-card p-4">
+          <div className="flex min-h-[1.5rem] items-center justify-between gap-2">
+            <p className="text-sm font-medium text-slate-300">שווי דירה</p>
+            <span className="invisible shrink-0 rounded-full px-2 py-0.5 text-xs">—</span>
+          </div>
+
+          <div>
+            <FieldLabel>סכום (₪)</FieldLabel>
+            <NumberField
+              value={mortgage.apartmentValue}
+              onChange={(v) => setField({ apartmentValue: v })}
+              prefix="₪"
+            />
+          </div>
+
+          <div className="invisible pointer-events-none" aria-hidden>
+            <FieldLabel>אחוז משווי דירה</FieldLabel>
+            <NumberField value={0} onChange={() => {}} suffix="%" disabled />
+          </div>
+
+          <div className="min-h-[1.25rem]" />
         </div>
 
         <EquityField

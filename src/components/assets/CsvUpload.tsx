@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { Upload, FileSpreadsheet } from 'lucide-react';
-import { parseCsvFile } from '../../lib/csvParser';
+import { parseAssetFile } from '../../lib/assetImport';
 import type { Asset } from '../../types';
 import { formatCurrency } from '../../lib/format';
 import { Alert } from '../ui/Alert';
@@ -21,7 +21,7 @@ export function CsvUpload({ isOpen, onClose }: CsvUploadProps) {
   const [dragOver, setDragOver] = useState(false);
 
   const handleFile = useCallback(async (file: File) => {
-    const result = await parseCsvFile(file);
+    const result = await parseAssetFile(file);
     setPreview(result.assets);
     setErrors(result.errors);
   }, []);
@@ -51,8 +51,10 @@ export function CsvUpload({ isOpen, onClose }: CsvUploadProps) {
     onClose();
   };
 
+  const baseUrl = import.meta.env.BASE_URL;
+
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="ייבוא נכסים מ-CSV" size="lg">
+    <Modal isOpen={isOpen} onClose={handleClose} title="ייבוא נכסים מ-Excel" size="lg">
       <div className="space-y-4">
         <div
           onDragOver={(e) => {
@@ -66,12 +68,12 @@ export function CsvUpload({ isOpen, onClose }: CsvUploadProps) {
           }`}
         >
           <Upload className="mb-3 h-10 w-10 text-slate-500" />
-          <p className="mb-2 text-sm text-slate-300">גרור קובץ CSV לכאן או</p>
+          <p className="mb-2 text-sm text-slate-300">גרור קובץ Excel לכאן או</p>
           <label className="cursor-pointer rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent/80">
             בחר קובץ
             <input
               type="file"
-              accept=".csv"
+              accept=".xlsx,.xls"
               className="hidden"
               onChange={(e) => {
                 const file = e.target.files?.[0];
@@ -79,9 +81,16 @@ export function CsvUpload({ isOpen, onClose }: CsvUploadProps) {
               }}
             />
           </label>
-          <p className="mt-3 text-xs text-slate-500">
-            עמודות נדרשות: שם, בעלים, סכום, מס%, נזילות
+          <p className="mt-3 text-center text-xs text-slate-500">
+            גיליון עם עמודות: מוצר/שם, שותפים, נזיל/לא נזיל, הערות
           </p>
+          <a
+            href={`${baseUrl}assets-template.xlsx`}
+            download="assets-template.xlsx"
+            className="mt-2 text-xs text-accent hover:underline"
+          >
+            הורד תבנית Excel
+          </a>
         </div>
 
         {errors.length > 0 && (

@@ -5,10 +5,10 @@ import { useSettingsStore } from '../store/useSettingsStore';
 import {
   runSimulation,
   findCashTrough,
-  getLatestLtv,
-  getLatestNetEquity,
+  getMetricAtMonth,
   mortgagePrincipal,
   monthlyPayment,
+  totalNet,
 } from '../lib/calculations';
 
 export function useSimulation() {
@@ -24,11 +24,18 @@ export function useSimulation() {
     const principal = mortgagePrincipal(mortgage);
     const payment = monthlyPayment(principal, mortgage.annualRate, mortgage.termYears);
 
+    const entryMonth = Math.min(mortgage.entryMonthOffset, chartData.length - 1);
+    const atEntry = getMetricAtMonth(chartData, entryMonth);
+    const atToday = getMetricAtMonth(chartData, 0);
+
     return {
       chartData,
       cashTrough,
-      currentLtv: getLatestLtv(chartData),
-      netEquity: getLatestNetEquity(chartData),
+      currentLtv: atEntry.ltv,
+      netEquity: atEntry.netEquity,
+      netEquityToday: atToday.netEquity,
+      savingsNet: totalNet(assets),
+      entryMonthLabel: atEntry.month,
       mortgagePrincipal: principal,
       monthlyPayment: payment,
       scenario,

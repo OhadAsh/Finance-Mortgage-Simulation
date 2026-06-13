@@ -6,6 +6,8 @@ import { MetricCard } from '../ui/MetricCard';
 interface SidebarProps {
   ltv: number;
   netEquity: number;
+  savingsNet: number;
+  entryMonthLabel: string;
 }
 
 const scenarioBadgeColors: Record<'a' | 'b' | 'c', string> = {
@@ -14,7 +16,7 @@ const scenarioBadgeColors: Record<'a' | 'b' | 'c', string> = {
   c: 'text-danger',
 };
 
-export function Sidebar({ ltv, netEquity }: SidebarProps) {
+export function Sidebar({ ltv, netEquity, savingsNet, entryMonthLabel }: SidebarProps) {
   const activeScenario = useSettingsStore((s) => s.activeScenario);
   const scenarios = useSettingsStore((s) => s.scenarios);
   const scenario = scenarios[activeScenario];
@@ -24,15 +26,23 @@ export function Sidebar({ ltv, netEquity }: SidebarProps) {
       <MetricCard
         title="הון עצמי נטו"
         value={formatCurrency(netEquity)}
+        subtitle={`בכניסה לדירה (${entryMonthLabel}) · מזומן + שווי דירה − משכנתא`}
         icon={<TrendingUp className="h-4 w-4" />}
         variant={netEquity >= 0 ? 'accent' : 'danger'}
       />
       <MetricCard
-        title="LTV נוכחי"
+        title="LTV בכניסה"
         value={formatPercent(ltv, 0)}
+        subtitle="יתרת משכנתא ÷ שווי דירה"
         icon={<Percent className="h-4 w-4" />}
         variant={ltv < 60 ? 'accent' : ltv < 80 ? 'amber' : 'danger'}
       />
+      <div className="col-span-2 rounded-xl border border-slate-700 bg-card p-4 lg:col-span-1">
+        <p className="text-xs text-slate-500">
+          סה״כ נכסים היום (ללא דירה):{' '}
+          <span className="font-mono text-slate-300">{formatCurrency(savingsNet)}</span>
+        </p>
+      </div>
       <div className="col-span-2 rounded-xl border border-slate-700 bg-card p-4 lg:col-span-1">
         <div className="flex items-center gap-2">
           <BarChart3 className="h-4 w-4 text-slate-500" />
