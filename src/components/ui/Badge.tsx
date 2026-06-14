@@ -55,7 +55,3 @@ export function Badge({ status, onClick, active = false, size = 'md' }: BadgePro
     </span>
   );
 }
-
-export function LiquidityBadge({ status }: { status: LiquidityStatus }) {
-  return <Badge status={status} />;
-}

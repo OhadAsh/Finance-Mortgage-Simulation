@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { Upload, FileSpreadsheet } from 'lucide-react';
 import { parseAssetFile } from '../../lib/assetImport';
 import type { Asset } from '../../types';
-import { formatCurrency } from '../../lib/format';
+import { formatCurrency } from '../../lib/utils';
 import { Alert } from '../ui/Alert';
 import { Modal } from '../ui/Modal';
 import { Badge } from '../ui/Badge';

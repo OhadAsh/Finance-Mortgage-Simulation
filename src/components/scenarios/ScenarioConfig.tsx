@@ -1,4 +1,5 @@
 import type { ScenarioConfig } from '../../types';
+import { MAX_SCENARIO_MONTH } from '../../lib/constants';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import { NumberField } from '../ui/NumberField';
 
@@ -69,7 +70,7 @@ export function ScenarioConfigPanel({ scenario }: ScenarioConfigPanelProps) {
               <NumberField
                 value={scenario.incomeSource1StartMonth}
                 min={0}
-                max={36}
+                max={MAX_SCENARIO_MONTH}
                 onChange={(val) =>
                   updateScenario(scenario.id, { incomeSource1StartMonth: val })
                 }

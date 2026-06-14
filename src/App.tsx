@@ -16,11 +16,22 @@ export function App() {
   const { chartData, currentLtv, netEquity, savingsNet, entryMonthLabel } = useSimulation();
   const { exportXlsx, exportPdf, exporting } = useExportReport();
   const [apiModalOpen, setApiModalOpen] = useState(false);
+  const [apiModalError, setApiModalError] = useState<string | null>(null);
+
+  const handleOpenApiModal = (): void => {
+    setApiModalError(null);
+    setApiModalOpen(true);
+  };
+
+  const handleApiKeyUnauthorized = (message: string): void => {
+    setApiModalError(message);
+    setApiModalOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-navy">
       <Header
-        onApiKeyClick={() => setApiModalOpen(true)}
+        onApiKeyClick={handleOpenApiModal}
         onExportXlsx={exportXlsx}
         onExportPdf={exportPdf}
         exporting={exporting}
@@ -59,12 +70,22 @@ export function App() {
               <LtvGauge value={currentLtv} />
             </div>
             <EquityChart data={chartData} />
-            <InsightsPanel onRequestApiKey={() => setApiModalOpen(true)} />
+            <InsightsPanel
+              onRequestApiKey={handleOpenApiModal}
+              onApiKeyUnauthorized={handleApiKeyUnauthorized}
+            />
           </div>
         </div>
       </main>
 
-      <ApiKeyModal isOpen={apiModalOpen} onClose={() => setApiModalOpen(false)} />
+      <ApiKeyModal
+        isOpen={apiModalOpen}
+        errorMessage={apiModalError}
+        onClose={() => {
+          setApiModalError(null);
+          setApiModalOpen(false);
+        }}
+      />
     </div>
   );
 }

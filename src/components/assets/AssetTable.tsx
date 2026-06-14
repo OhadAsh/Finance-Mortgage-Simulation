@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Plus, FileUp } from 'lucide-react';
 import { useAssetsStore } from '../../store/useAssetsStore';
 import { totalGross, totalNet, totalLiquidNet } from '../../lib/calculations';
-import { formatCurrency } from '../../lib/format';
+import { formatCurrency } from '../../lib/utils';
 import { AssetRow } from './AssetRow';
 import { AssetTotals } from './AssetTotals';
 import { CsvUpload } from './CsvUpload';

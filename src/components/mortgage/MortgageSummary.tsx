@@ -4,7 +4,8 @@ import {
   remainingLiquidAfterEntry,
   totalEquity,
 } from '../../lib/calculations';
-import { formatCurrency, formatPercent } from '../../lib/format';
+import { LOW_LIQUID_WARNING } from '../../lib/constants';
+import { formatCurrency, formatPercent } from '../../lib/utils';
 import { selectMortgageParams, useMortgageStore } from '../../store/useMortgageStore';
 import { useAssetsStore } from '../../store/useAssetsStore';
 
@@ -32,7 +33,7 @@ export function MortgageSummary() {
     {
       label: 'נזילות שנותרת אחרי כניסה',
       value: formatCurrency(remainingLiquid),
-      highlight: remainingLiquid < 0 ? 'danger' : remainingLiquid < 100000 ? 'amber' : 'accent',
+      highlight: remainingLiquid < 0 ? 'danger' : remainingLiquid < LOW_LIQUID_WARNING ? 'amber' : 'accent',
     },
   ];
 

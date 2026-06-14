@@ -2,7 +2,7 @@ import * as XLSX from 'xlsx';
 import type { Asset, ChartPoint, LiquidityStatus, MortgageParams, ScenarioConfig } from '../types';
 import type { CashTrough } from '../types';
 import { netAssetValue, totalLiquidNet, totalNet } from './calculations';
-import { formatCurrency, formatNumber, formatPercent } from './format';
+import { formatCurrency, formatCurrencyAxis, formatNumber, formatPercent } from './utils';
 
 export interface ExportSnapshot {
   assets: Asset[];
@@ -34,7 +34,7 @@ function timestamp(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-function downloadBlob(blob: Blob, filename: string) {
+function downloadBlob(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
@@ -179,7 +179,7 @@ function buildLineChartSvg(
       const val = minVal + range * t;
       return `
         <line x1="${pad.left}" y1="${y}" x2="${width - pad.right}" y2="${y}" stroke="#e2e8f0" stroke-width="1"/>
-        <text x="${pad.left - 6}" y="${y + 4}" text-anchor="end" font-size="9" fill="#94a3b8">${Math.round(val / 1000)}K</text>
+        <text x="${pad.left - 6}" y="${y + 4}" text-anchor="end" font-size="9" fill="#94a3b8">${formatCurrencyAxis(val)}</text>
       `;
     })
     .join('');
@@ -261,7 +261,7 @@ function buildReportHtml(snapshot: ExportSnapshot): string {
       <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 12px;">
         <tr><td style="padding: 6px 0; color: #64748b;">תרחיש פעיל</td><td style="padding: 6px 0; font-weight: 600;">${snapshot.scenario.label}</td></tr>
         <tr><td style="padding: 6px 0; color: #64748b;">הון עצמי נטו</td><td style="padding: 6px 0; font-weight: 600;">${formatCurrency(snapshot.netEquity)}</td></tr>
-        <tr><td style="padding: 6px 0; color: #64748b;">LTV נוכחי</td><td style="padding: 6px 0; font-weight: 600;">${formatPercent(snapshot.currentLtv, 1)}</td></tr>
+        <tr><td style="padding: 6px 0; color: #64748b;">יחס הלוואה לשווי</td><td style="padding: 6px 0; font-weight: 600;">${formatPercent(snapshot.currentLtv, 1)}</td></tr>
         <tr><td style="padding: 6px 0; color: #64748b;">שפל תזרים</td><td style="padding: 6px 0; font-weight: 600;">${snapshot.cashTrough.month} — ${formatCurrency(snapshot.cashTrough.value)}</td></tr>
         <tr><td style="padding: 6px 0; color: #64748b;">סה״כ נטו / נזיל</td><td style="padding: 6px 0; font-weight: 600;">${formatCurrency(totalNet(snapshot.assets))} / ${formatCurrency(totalLiquidNet(snapshot.assets))}</td></tr>
         <tr><td style="padding: 6px 0; color: #64748b;">תשלום חודשי</td><td style="padding: 6px 0; font-weight: 600;">${formatCurrency(snapshot.monthlyPayment)}</td></tr>

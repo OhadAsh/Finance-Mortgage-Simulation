@@ -11,7 +11,8 @@ import {
   ReferenceLine,
 } from 'recharts';
 import type { ChartPoint } from '../../types';
-import { formatCurrency } from '../../lib/format';
+import { CHART_ANIMATION_MS } from '../../lib/constants';
+import { formatCurrency, formatCurrencyAxis } from '../../lib/utils';
 
 interface MainChartProps {
   data: ChartPoint[];
@@ -66,7 +67,7 @@ export function MainChart({ data }: MainChartProps) {
           />
           <YAxis
             tick={{ fill: '#94a3b8', fontSize: 11 }}
-            tickFormatter={(v: number) => `₪${Math.abs(v / 1000).toFixed(0)}K`}
+            tickFormatter={(v: number) => formatCurrencyAxis(v)}
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend />
@@ -93,7 +94,7 @@ export function MainChart({ data }: MainChartProps) {
             type="linear"
             strokeWidth={2}
             dot={false}
-            animationDuration={800}
+            animationDuration={CHART_ANIMATION_MS}
           />
           <Area
             dataKey="mortgageBalance"
@@ -105,7 +106,7 @@ export function MainChart({ data }: MainChartProps) {
             strokeWidth={2}
             strokeDasharray="5 5"
             dot={false}
-            animationDuration={800}
+            animationDuration={CHART_ANIMATION_MS}
           />
           <Area
             dataKey="liquidNetEquity"
@@ -118,7 +119,7 @@ export function MainChart({ data }: MainChartProps) {
             strokeWidth={1}
             strokeDasharray="4 2"
             dot={false}
-            animationDuration={800}
+            animationDuration={CHART_ANIMATION_MS}
           />
         </AreaChart>
       </ResponsiveContainer>

@@ -1,11 +1,26 @@
 import { useCallback, useRef, useState } from 'react';
-import { fetchAiInsights } from '../lib/aiInsights';
+import type { Asset, ChartPoint, MortgageParams, ScenarioConfig } from '../types';
+import { fetchAiInsights, ApiUnauthorizedError } from '../lib/aiInsights';
 import { useAssetsStore } from '../store/useAssetsStore';
-import { useMortgageStore } from '../store/useMortgageStore';
+import { selectMortgageParams, useMortgageStore } from '../store/useMortgageStore';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { useSimulation } from './useSimulation';
+import { useShallow } from 'zustand/react/shallow';
 
-export function useAiInsights() {
+export interface AiInsightsResult {
+  text: string;
+  loading: boolean;
+  error: string | null;
+  selectedLabel: string | null;
+  generateWithPrompt: (prompt: string, label: string) => Promise<void>;
+  hasApiKey: boolean;
+  assets: Asset[];
+  mortgage: MortgageParams;
+  chartData: ChartPoint[];
+  scenario: ScenarioConfig;
+}
+
+export function useAiInsights(onUnauthorized?: (message: string) => void): AiInsightsResult {
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -13,12 +28,13 @@ export function useAiInsights() {
   const abortRef = useRef<AbortController | null>(null);
 
   const apiKey = useSettingsStore((s) => s.openRouterApiKey);
+  const clearApiKey = useSettingsStore((s) => s.clearApiKey);
   const assets = useAssetsStore((s) => s.assets);
-  const mortgage = useMortgageStore();
+  const mortgage = useMortgageStore(useShallow(selectMortgageParams));
   const { chartData, scenario } = useSimulation();
 
   const generateWithPrompt = useCallback(
-    async (prompt: string, label: string) => {
+    async (prompt: string, label: string): Promise<void> => {
       if (!apiKey) return;
 
       abortRef.current?.abort();
@@ -38,25 +54,21 @@ export function useAiInsights() {
         }
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') return;
+        if (err instanceof ApiUnauthorizedError) {
+          clearApiKey();
+          setError(err.message);
+          setSelectedLabel(null);
+          onUnauthorized?.(err.message);
+          return;
+        }
         setError(err instanceof Error ? err.message : 'שגיאה לא צפויה');
         setSelectedLabel(null);
       } finally {
         setLoading(false);
       }
     },
-    [apiKey],
+    [apiKey, clearApiKey, onUnauthorized],
   );
-
-  const cancel = useCallback(() => {
-    abortRef.current?.abort();
-    setLoading(false);
-  }, []);
-
-  const reset = useCallback(() => {
-    setText('');
-    setError(null);
-    setSelectedLabel(null);
-  }, []);
 
   return {
     text,
@@ -64,8 +76,6 @@ export function useAiInsights() {
     error,
     selectedLabel,
     generateWithPrompt,
-    cancel,
-    reset,
     hasApiKey: !!apiKey,
     assets,
     mortgage,

@@ -9,7 +9,8 @@ import {
   Cell,
 } from 'recharts';
 import type { ChartPoint } from '../../types';
-import { formatCurrency } from '../../lib/format';
+import { CHART_ANIMATION_MS } from '../../lib/constants';
+import { formatCurrency, formatCurrencyAxis } from '../../lib/utils';
 
 interface EquityChartProps {
   data: ChartPoint[];
@@ -50,10 +51,10 @@ export function EquityChart({ data }: EquityChartProps) {
           />
           <YAxis
             tick={{ fill: '#94a3b8', fontSize: 11 }}
-            tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}K`}
+            tickFormatter={(v: number) => formatCurrencyAxis(v)}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Bar dataKey="cashBalance" radius={[4, 4, 0, 0]} animationDuration={800}>
+          <Bar dataKey="cashBalance" radius={[4, 4, 0, 0]} animationDuration={CHART_ANIMATION_MS}>
             {data.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}

@@ -28,33 +28,36 @@ export function Header({ onApiKeyClick, onExportXlsx, onExportPdf, exporting }: 
             type="button"
             onClick={onExportXlsx}
             disabled={exporting}
+            title="ייצוא לאקסל"
+            aria-label="ייצוא לאקסל"
             className="flex items-center gap-1.5 rounded-lg border border-slate-600 px-3 py-2 text-sm text-slate-300 transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
-            title="ייצוא Excel"
           >
             <FileSpreadsheet className="h-4 w-4" />
-            <span className="hidden sm:inline">Excel</span>
+            <span className="hidden sm:inline">לאקסל</span>
           </button>
           <button
             type="button"
             onClick={() => void onExportPdf()}
             disabled={exporting}
+            title="ייצוא לקובץ PDF"
+            aria-label="ייצוא לקובץ PDF"
             className="flex items-center gap-1.5 rounded-lg border border-slate-600 px-3 py-2 text-sm text-slate-300 transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
-            title="ייצוא PDF"
           >
             {exporting ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <FileText className="h-4 w-4" />
             )}
-            <span className="hidden sm:inline">PDF</span>
+            <span className="hidden sm:inline">לקובץ PDF</span>
           </button>
           <button
             type="button"
             onClick={onApiKeyClick}
+            aria-label="הגדרת מפתח ממשק"
             className="flex items-center gap-1.5 rounded-lg border border-slate-600 px-3 py-2 text-sm text-slate-300 transition-colors hover:border-accent hover:text-accent"
           >
             <Key className="h-4 w-4" />
-            <span className="hidden sm:inline">מפתח API</span>
+            <span className="hidden sm:inline">מפתח ממשק</span>
           </button>
         </div>
       </div>

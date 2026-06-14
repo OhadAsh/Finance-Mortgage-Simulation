@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { MortgageParams } from '../types';
+import { createVersionedLocalStorage } from '../lib/persistStorage';
 
 function calcFromPercent(value: number, percent: number): number {
   return Math.round(value * percent / 100);
@@ -97,7 +98,7 @@ export const useMortgageStore = create<MortgageState>()(
     }),
     {
       name: 'mortgage-store',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => createVersionedLocalStorage()),
       version: 6,
       migrate: (persistedState) =>
         syncDerivedFields({

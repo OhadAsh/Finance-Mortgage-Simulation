@@ -1,7 +1,7 @@
 import { Wallet, Droplets, Lock } from 'lucide-react';
 import { useAssetsStore } from '../../store/useAssetsStore';
 import { totalGross, totalNet, totalLiquidNet } from '../../lib/calculations';
-import { formatCurrency } from '../../lib/format';
+import { formatCurrency } from '../../lib/utils';
 import { MetricCard } from '../ui/MetricCard';
 
 export function AssetTotals() {

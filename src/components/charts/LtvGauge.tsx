@@ -1,19 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
-import { formatPercent } from '../../lib/format';
+import { CHART_ANIMATION_MS, LTV_GOOD_MAX, LTV_WARN_MAX } from '../../lib/constants';
+import { formatPercent } from '../../lib/utils';
 
 interface LtvGaugeProps {
   value: number;
 }
 
 function getColor(ltv: number): string {
-  if (ltv < 60) return '#10B981';
-  if (ltv < 80) return '#F59E0B';
+  if (ltv < LTV_GOOD_MAX) return '#10B981';
+  if (ltv < LTV_WARN_MAX) return '#F59E0B';
   return '#EF4444';
 }
 
 function getLabel(ltv: number): string {
-  if (ltv < 60) return 'מצוין';
-  if (ltv < 80) return 'סביר';
+  if (ltv < LTV_GOOD_MAX) return 'מצוין';
+  if (ltv < LTV_WARN_MAX) return 'סביר';
   return 'גבוה';
 }
 
@@ -50,7 +51,7 @@ export function LtvGauge({ value }: LtvGaugeProps) {
     const to = clampedValue;
     if (Math.abs(from - to) < 0.01) return;
 
-    const duration = 800;
+    const duration = CHART_ANIMATION_MS;
     const start = performance.now();
     let raf = 0;
 
@@ -72,7 +73,7 @@ export function LtvGauge({ value }: LtvGaugeProps) {
 
   return (
     <div className="flex flex-col items-center rounded-xl border border-slate-700 bg-card p-4">
-      <h3 className="mb-2 text-sm font-medium text-slate-300">יחס הלוואה לשווי (LTV)</h3>
+      <h3 className="mb-2 text-sm font-medium text-slate-300">יחס הלוואה לשווי</h3>
       <svg width="200" height="160" viewBox="0 0 200 160">
         <path
           d={ARC_PATH}

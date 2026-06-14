@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState, type ReactElement } from 'react';
 
 interface NumberFieldProps {
   value: number;
@@ -9,6 +9,8 @@ interface NumberFieldProps {
   prefix?: string;
   min?: number;
   max?: number;
+  id?: string;
+  ariaLabel?: string;
 }
 
 export function NumberField({
@@ -20,7 +22,11 @@ export function NumberField({
   prefix,
   min,
   max,
-}: NumberFieldProps) {
+  id,
+  ariaLabel,
+}: NumberFieldProps): ReactElement {
+  const generatedId = useId();
+  const inputId = id ?? generatedId;
   const [text, setText] = useState(String(value));
   const [focused, setFocused] = useState(false);
 
@@ -30,7 +36,7 @@ export function NumberField({
     }
   }, [value, focused]);
 
-  const commit = (raw: string) => {
+  const commit = (raw: string): void => {
     const cleaned = raw.replace(/[^\d.-]/g, '');
     if (cleaned === '' || cleaned === '-') {
       onChange(0);
@@ -53,10 +59,12 @@ export function NumberField({
         </span>
       )}
       <input
+        id={inputId}
         type="text"
         inputMode="decimal"
         value={text}
         disabled={disabled}
+        aria-label={ariaLabel}
         onFocus={() => setFocused(true)}
         onBlur={() => {
           setFocused(false);

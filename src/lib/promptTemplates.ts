@@ -9,7 +9,8 @@ import {
 } from 'lucide-react';
 import type { Asset, ChartPoint, MortgageParams, ScenarioConfig } from '../types';
 import { findCashTrough, totalLiquidNet, totalNet, mortgagePrincipal, monthlyPayment } from './calculations';
-import { formatCurrency, formatPercent } from './format';
+import { formatCurrency, formatPercent } from './utils';
+import { SIMULATION_MONTHS } from './constants';
 
 export type PromptCategory = 'risk' | 'optimize' | 'scenario';
 
@@ -54,7 +55,7 @@ function stateBlock(
 תרחיש פעיל: ${activeScenario.label}
 ${JSON.stringify(activeScenario, null, 2)}
 
-סימולציה (30 חודשים):
+סימולציה (${SIMULATION_MONTHS} חודשים):
 - שפל תזרים: ${trough.month} — ${formatCurrency(trough.value)}
 - מצב אחרון: נכסים ${formatCurrency(latest?.totalAssets ?? 0)}, יתרת משכנתא ${formatCurrency(latest?.mortgageBalance ?? 0)}, הון עצמי נטו ${formatCurrency(latest?.netEquity ?? 0)}, LTV ${formatPercent(latest?.ltv ?? 0, 1)}`;
 }
@@ -175,18 +176,4 @@ export function buildFreeTextPrompt(
 שאלת המשתמש: ${question}
 
 ${stateBlock(assets, mortgage, simulation, activeScenario)}`;
-}
-
-export function buildMarketInsightPrompt(
-  mortgage: MortgageParams,
-  simulation: ChartPoint[],
-): string {
-  const latest = simulation[simulation.length - 1];
-  return `אתה אנליסט פיננסי ישראלי. כתוב תובנה קצרה בעברית (עד 150 מילים).
-
-נושא: ריבית בנק ישראל והשפעותיה שכבר התרחשו על שוק המשכנתאות בישראל.
-התמקד בעבר בלבד — לא תחזיות עתידיות.
-
-הקשר מהסימולטור (לציון בלבד):
-ריבית משכנתא: ${mortgage.annualRate}% | LTV: ${formatPercent(latest?.ltv ?? 0, 1)}`;
 }

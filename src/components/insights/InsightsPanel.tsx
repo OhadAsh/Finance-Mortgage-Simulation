@@ -18,9 +18,10 @@ function ResponseSkeleton() {
 
 interface InsightsPanelProps {
   onRequestApiKey: () => void;
+  onApiKeyUnauthorized: (message: string) => void;
 }
 
-export function InsightsPanel({ onRequestApiKey }: InsightsPanelProps) {
+export function InsightsPanel({ onRequestApiKey, onApiKeyUnauthorized }: InsightsPanelProps) {
   const {
     text,
     loading,
@@ -32,7 +33,7 @@ export function InsightsPanel({ onRequestApiKey }: InsightsPanelProps) {
     mortgage,
     chartData,
     scenario,
-  } = useAiInsights();
+  } = useAiInsights(onApiKeyUnauthorized);
 
   const [freeText, setFreeText] = useState('');
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
@@ -123,6 +124,7 @@ export function InsightsPanel({ onRequestApiKey }: InsightsPanelProps) {
               onChange={(e) => setFreeText(e.target.value)}
               onKeyDown={handleFreeTextKeyDown}
               rows={2}
+              aria-label="שאלה חופשית על המצב הפיננסי"
               placeholder="שאל שאלה חופשית על המצב הפיננסי שלך..."
               disabled={loading}
               className="min-h-11 w-full resize-none rounded-xl border border-slate-700 bg-card py-2.5 pl-3 pr-10 text-sm leading-relaxed text-white outline-none transition-colors placeholder:text-slate-500 focus:border-accent disabled:opacity-50"

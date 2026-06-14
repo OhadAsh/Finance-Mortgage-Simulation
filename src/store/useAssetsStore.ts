@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { Asset, LiquidityStatus } from '../types';
+import { createVersionedLocalStorage } from '../lib/persistStorage';
 
 function generateId(): string {
   return crypto.randomUUID();
@@ -52,7 +53,7 @@ export const useAssetsStore = create<AssetsState>()(
     }),
     {
       name: 'assets-store',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => createVersionedLocalStorage()),
       version: 5,
       migrate: () => ({ assets: [] }),
     },

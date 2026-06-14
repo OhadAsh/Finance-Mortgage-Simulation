@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { ScenarioConfig } from '../types';
 import { SCENARIO_DEFAULTS } from '../types';
+import { MAX_SCENARIO_MONTH } from '../lib/constants';
+import { createVersionedLocalStorage } from '../lib/persistStorage';
 
 interface SettingsState {
   openRouterApiKey: string | null;
@@ -47,7 +49,7 @@ function normalizeScenario(scenario: LegacyScenario, id: 'a' | 'b' | 'c'): Scena
     incomeSource2:
       scenario.incomeSource2 ?? scenario.wifeSalaryNet ?? defaults.incomeSource2,
     incomeSource1Active: legacyActive,
-    incomeSource1StartMonth: legacyActive ? Math.min(Math.max(0, startMonth), 36) : 0,
+    incomeSource1StartMonth: legacyActive ? Math.min(Math.max(0, startMonth), MAX_SCENARIO_MONTH) : 0,
   };
 }
 
@@ -87,7 +89,7 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: 'settings-store',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => createVersionedLocalStorage()),
       version: 7,
       migrate: (persistedState) => {
         const state = persistedState as Partial<SettingsState & LegacySettings> | undefined;

@@ -3,9 +3,15 @@ import { useAssetsStore } from '../store/useAssetsStore';
 import { useMortgageStore } from '../store/useMortgageStore';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { useSimulation } from './useSimulation';
-import { exportToPdf, exportToXlsx } from '../lib/exportReport';
+import { exportToPdf, exportToXlsx, type ExportSnapshot } from '../lib/exportReport';
 
-export function useExportReport() {
+export interface ExportReportResult {
+  exportXlsx: () => void;
+  exportPdf: () => Promise<void>;
+  exporting: boolean;
+}
+
+export function useExportReport(): ExportReportResult {
   const [exporting, setExporting] = useState(false);
   const assets = useAssetsStore((s) => s.assets);
   const mortgage = useMortgageStore();
@@ -13,7 +19,7 @@ export function useExportReport() {
   const scenarios = useSettingsStore((s) => s.scenarios);
   const simulation = useSimulation();
 
-  const buildSnapshot = useCallback(() => {
+  const buildSnapshot = useCallback((): ExportSnapshot => {
     const { chartData, cashTrough, currentLtv, netEquity, mortgagePrincipal, monthlyPayment, scenario } =
       simulation;
 
@@ -32,11 +38,11 @@ export function useExportReport() {
     };
   }, [assets, mortgage, scenarios, activeScenario, simulation]);
 
-  const exportXlsx = useCallback(() => {
+  const exportXlsx = useCallback((): void => {
     exportToXlsx(buildSnapshot());
   }, [buildSnapshot]);
 
-  const exportPdf = useCallback(async () => {
+  const exportPdf = useCallback(async (): Promise<void> => {
     setExporting(true);
     try {
       await exportToPdf(buildSnapshot());

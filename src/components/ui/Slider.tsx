@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import { formatCurrency, formatPercent } from '../../lib/format';
+import { formatCurrency, formatPercent } from '../../lib/utils';
 
 interface SliderProps {
   label: string;

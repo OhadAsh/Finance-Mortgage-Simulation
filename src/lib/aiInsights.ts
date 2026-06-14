@@ -3,6 +3,13 @@ export const OPENROUTER_MODEL_URL =
   'https://openrouter.ai/openai/gpt-oss-120b:free';
 export const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
+export class ApiUnauthorizedError extends Error {
+  constructor() {
+    super('מפתח ה-API לא תקף או שפג תוקפו. הזן מפתח חדש.');
+    this.name = 'ApiUnauthorizedError';
+  }
+}
+
 interface OpenRouterStreamChunk {
   choices?: Array<{
     delta?: { content?: string };
@@ -33,14 +40,18 @@ export async function* fetchAiInsights(
     signal,
   });
 
+  if (response.status === 401) {
+    throw new ApiUnauthorizedError();
+  }
+
   if (!response.ok) {
     const errorText = await response.text();
-    let message = errorText;
+    let message = 'בקשה נדחתה';
     try {
       const parsed = JSON.parse(errorText) as { error?: { message?: string } };
-      message = parsed.error?.message ?? errorText;
+      message = parsed.error?.message ?? message;
     } catch {
-      // use raw text
+      // omit raw body — may contain sensitive details
     }
     throw new Error(`שגיאת OpenRouter (${response.status}): ${message}`);
   }

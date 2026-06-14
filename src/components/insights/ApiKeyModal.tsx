@@ -8,9 +8,10 @@ import { OPENROUTER_MODEL, OPENROUTER_MODEL_URL } from '../../lib/aiInsights';
 interface ApiKeyModalProps {
   isOpen: boolean;
   onClose: () => void;
+  errorMessage?: string | null;
 }
 
-export function ApiKeyModal({ isOpen, onClose }: ApiKeyModalProps) {
+export function ApiKeyModal({ isOpen, onClose, errorMessage }: ApiKeyModalProps) {
   const apiKey = useSettingsStore((s) => s.openRouterApiKey);
   const setApiKey = useSettingsStore((s) => s.setApiKey);
   const clearApiKey = useSettingsStore((s) => s.clearApiKey);
@@ -38,6 +39,11 @@ export function ApiKeyModal({ isOpen, onClose }: ApiKeyModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="הגדרת מפתח OpenRouter" size="sm">
       <div className="space-y-4">
+        {errorMessage && (
+          <Alert variant="error" title="מפתח לא תקף">
+            <p>{errorMessage}</p>
+          </Alert>
+        )}
         <Alert variant="info" title="פרטיות">
           <p>
             מפתח ה-API נשמר רק בדפדפן שלך (localStorage) ונשלח ישירות ל-OpenRouter בלבד.

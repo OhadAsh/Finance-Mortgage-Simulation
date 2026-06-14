@@ -2,6 +2,7 @@ import { Home, RotateCcw } from 'lucide-react';
 import { useMortgageStore } from '../../store/useMortgageStore';
 import { useAssetsStore } from '../../store/useAssetsStore';
 import { totalLiquidNet } from '../../lib/calculations';
+import { MAX_ENTRY_MONTH_OFFSET } from '../../lib/constants';
 import { Slider } from '../ui/Slider';
 import { NumberField } from '../ui/NumberField';
 import { MortgageSummary } from './MortgageSummary';
@@ -46,12 +47,22 @@ function EquityField({
 
       <div>
         <FieldLabel>סכום (₪)</FieldLabel>
-        <NumberField value={amount} onChange={onAmountChange} prefix="₪" />
+        <NumberField
+          value={amount}
+          onChange={onAmountChange}
+          prefix="₪"
+          ariaLabel={`${label} — סכום`}
+        />
       </div>
 
       <div>
         <FieldLabel>אחוז משווי דירה</FieldLabel>
-        <NumberField value={percent} onChange={onPercentChange} suffix="%" />
+        <NumberField
+          value={percent}
+          onChange={onPercentChange}
+          suffix="%"
+          ariaLabel={`${label} — אחוז משווי דירה`}
+        />
       </div>
 
       <div className="min-h-[1.25rem]">
@@ -96,6 +107,7 @@ export function MortgagePanel() {
               value={mortgage.apartmentValue}
               onChange={(v) => setField({ apartmentValue: v })}
               prefix="₪"
+              ariaLabel="שווי דירה — סכום"
             />
           </div>
 
@@ -139,10 +151,10 @@ export function MortgagePanel() {
             </span>
           </div>
           <Slider
-            label=""
+            label="חודש כניסה לדירה"
             value={mortgage.entryMonthOffset}
             min={0}
-            max={36}
+            max={MAX_ENTRY_MONTH_OFFSET}
             step={1}
             onChange={(v) => setField({ entryMonthOffset: v })}
             format="number"

@@ -1,6 +1,7 @@
 import { TrendingUp, Percent, BarChart3 } from 'lucide-react';
 import { useSettingsStore } from '../../store/useSettingsStore';
-import { formatCurrency, formatPercent } from '../../lib/format';
+import { LTV_GOOD_MAX, LTV_WARN_MAX } from '../../lib/constants';
+import { formatCurrency, formatPercent } from '../../lib/utils';
 import { MetricCard } from '../ui/MetricCard';
 
 interface SidebarProps {
@@ -31,11 +32,11 @@ export function Sidebar({ ltv, netEquity, savingsNet, entryMonthLabel }: Sidebar
         variant={netEquity >= 0 ? 'accent' : 'danger'}
       />
       <MetricCard
-        title="LTV בכניסה"
+        title="יחס הלוואה לשווי בכניסה"
         value={formatPercent(ltv, 0)}
         subtitle="יתרת משכנתא ÷ שווי דירה"
         icon={<Percent className="h-4 w-4" />}
-        variant={ltv < 60 ? 'accent' : ltv < 80 ? 'amber' : 'danger'}
+        variant={ltv < LTV_GOOD_MAX ? 'accent' : ltv < LTV_WARN_MAX ? 'amber' : 'danger'}
       />
       <div className="col-span-2 rounded-xl border border-slate-700 bg-card p-4 lg:col-span-1">
         <p className="text-xs text-slate-500">

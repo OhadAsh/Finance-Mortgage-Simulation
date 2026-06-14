@@ -1,9 +1,12 @@
 import type { Asset, CashTrough, ChartPoint, MortgageParams, ScenarioConfig } from '../types';
 import { HEBREW_MONTHS } from '../types';
-
-const SIMULATION_MONTHS = 30;
-const START_YEAR = 2026;
-const START_MONTH = 5; // June (0-indexed)
+import {
+  POST_ENTRY_BUFFER_MONTHS,
+  SEMI_LIQUID_FACTOR,
+  SIMULATION_MONTHS,
+  START_MONTH,
+  START_YEAR,
+} from './constants';
 
 export function netAssetValue(asset: Asset): number {
   return asset.grossAmount * (1 - asset.taxRate);
@@ -24,7 +27,7 @@ export function totalLiquidNet(assets: Asset[]): number {
       case 'liquid':
         return sum + net;
       case 'semi':
-        return sum + net * 0.7;
+        return sum + net * SEMI_LIQUID_FACTOR;
       case 'locked':
         return sum;
     }
@@ -131,7 +134,7 @@ export function runSimulation(
   const entryPayment = mortgage.dueSoon + mortgage.extraEquity;
   let mortgageMonthsElapsed = 0;
   let mortgageBalance = 0;
-  const monthCount = Math.max(SIMULATION_MONTHS, mortgage.entryMonthOffset + 12);
+  const monthCount = Math.max(SIMULATION_MONTHS, mortgage.entryMonthOffset + POST_ENTRY_BUFFER_MONTHS);
 
   for (let m = 0; m < monthCount; m++) {
     cashPool += getMonthlyIncome(scenario, m);
@@ -204,18 +207,6 @@ export function findCashTrough(points: ChartPoint[]): CashTrough {
     value: trough?.cashBalance ?? 0,
     monthIndex: minIndex,
   };
-}
-
-export function getCurrentLtv(points: ChartPoint[]): number {
-  return points[0]?.ltv ?? 0;
-}
-
-export function getLatestLtv(points: ChartPoint[]): number {
-  return points[points.length - 1]?.ltv ?? 0;
-}
-
-export function getLatestNetEquity(points: ChartPoint[]): number {
-  return points[points.length - 1]?.netEquity ?? 0;
 }
 
 export function getMetricAtMonth(
