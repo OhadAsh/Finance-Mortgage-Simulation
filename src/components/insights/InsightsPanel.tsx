@@ -1,4 +1,4 @@
-import { useState, type KeyboardEvent } from 'react';
+import { useState, type KeyboardEvent, type ReactNode } from 'react';
 import { Sparkles, Loader2, Key, Send, Bot, MessageSquare } from 'lucide-react';
 import { Alert } from '../ui/Alert';
 import { PromptTemplates } from './PromptTemplates';
@@ -6,12 +6,25 @@ import { useAiInsights } from '../../hooks/useAiInsights';
 import type { PromptTemplate } from '../../lib/promptTemplates';
 import { buildFreeTextPrompt } from '../../lib/promptTemplates';
 
+const RESPONSE_PANEL_HEIGHT = 320;
+
 function ResponseSkeleton() {
   return (
     <div className="space-y-3 py-1">
       <div className="h-3 w-full animate-pulse rounded bg-slate-700" />
       <div className="h-3 w-11/12 animate-pulse rounded bg-slate-700" />
       <div className="h-3 w-4/5 animate-pulse rounded bg-slate-700" />
+    </div>
+  );
+}
+
+function ResponseScrollArea({ children }: { children: ReactNode }) {
+  return (
+    <div
+      className="overflow-y-auto [scrollbar-gutter:stable]"
+      style={{ height: RESPONSE_PANEL_HEIGHT }}
+    >
+      {children}
     </div>
   );
 }
@@ -37,6 +50,10 @@ export function InsightsPanel({ onRequestApiKey, onApiKeyUnauthorized }: Insight
 
   const [freeText, setFreeText] = useState('');
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+
+  const response = text;
+  const hasResponse = response.trim().length > 0;
+  const showLoadingSkeleton = loading && !hasResponse;
 
   const ensureApiKey = (): boolean => {
     if (!hasApiKey) {
@@ -68,11 +85,9 @@ export function InsightsPanel({ onRequestApiKey, onApiKeyUnauthorized }: Insight
     }
   };
 
-  const showResponse = loading || !!text;
-
   return (
-    <section className="space-y-5">
-      <div className="flex items-center justify-between">
+    <section className="flex h-full flex-col overflow-hidden">
+      <div className="mb-5 flex shrink-0 items-center justify-between">
         <div className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-accent" />
           <h2 className="text-lg font-semibold text-white">תובנות AI</h2>
@@ -87,105 +102,116 @@ export function InsightsPanel({ onRequestApiKey, onApiKeyUnauthorized }: Insight
         </button>
       </div>
 
-      <div className="relative">
-        <PromptTemplates
-          onSelect={handleTemplate}
-          loading={loading}
-          selectedTemplateId={selectedTemplateId}
-          disabled={!hasApiKey}
-        />
+      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-hidden">
+        <div className="relative shrink-0">
+          <PromptTemplates
+            onSelect={handleTemplate}
+            loading={loading}
+            selectedTemplateId={selectedTemplateId}
+            disabled={!hasApiKey}
+          />
 
-        {!hasApiKey && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center">
-            <div className="flex max-w-xs flex-col items-center gap-4 rounded-xl border border-slate-700 bg-navy/90 p-6 text-center shadow-xl backdrop-blur-sm">
-              <Bot className="h-12 w-12 text-slate-500" />
-              <p className="text-sm text-slate-400">
-                חבר את מפתח ה-API כדי לקבל תובנות חכמות
-              </p>
-              <button
-                type="button"
-                onClick={onRequestApiKey}
-                className="flex items-center gap-2 rounded-lg bg-accent/15 px-4 py-2 text-sm font-medium text-accent transition-colors hover:bg-accent/25"
-              >
-                <Key className="h-4 w-4" />
-                הוסף מפתח API
-              </button>
+          {!hasApiKey && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center">
+              <div className="flex max-w-xs flex-col items-center gap-4 rounded-xl border border-slate-700 bg-navy/90 p-6 text-center shadow-xl backdrop-blur-sm">
+                <Bot className="h-12 w-12 text-slate-500" />
+                <p className="text-sm text-slate-400">
+                  חבר את מפתח ה-API כדי לקבל תובנות חכמות
+                </p>
+                <button
+                  type="button"
+                  onClick={onRequestApiKey}
+                  className="flex items-center gap-2 rounded-lg bg-accent/15 px-4 py-2 text-sm font-medium text-accent transition-colors hover:bg-accent/25"
+                >
+                  <Key className="h-4 w-4" />
+                  הוסף מפתח API
+                </button>
+              </div>
             </div>
+          )}
+        </div>
+
+        <div className="shrink-0 space-y-1.5">
+          <div className="flex items-center gap-2">
+            <div className="relative min-w-0 flex-1">
+              <MessageSquare className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+              <textarea
+                value={freeText}
+                onChange={(e) => setFreeText(e.target.value)}
+                onKeyDown={handleFreeTextKeyDown}
+                rows={2}
+                aria-label="שאלה חופשית על המצב הפיננסי"
+                placeholder="שאל שאלה חופשית על המצב הפיננסי שלך..."
+                disabled={loading}
+                className="min-h-11 w-full resize-none rounded-xl border border-slate-700 bg-card py-2.5 pl-3 pr-10 text-sm leading-relaxed text-white outline-none transition-colors placeholder:text-slate-500 focus:border-accent disabled:opacity-50"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleFreeTextSubmit}
+              disabled={loading || !freeText.trim()}
+              aria-label="שלח שאלה"
+              className="flex h-11 w-11 shrink-0 items-center justify-center self-center rounded-xl bg-accent text-white transition-colors hover:bg-accent/80 disabled:opacity-50"
+            >
+              {loading && !selectedTemplateId ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Send className="h-5 w-5" />
+              )}
+            </button>
+          </div>
+          <p className="text-xs text-slate-500">
+            <kbd className="rounded border border-slate-600 bg-slate-800 px-1.5 py-0.5 font-mono text-[10px]">
+              Ctrl+Enter
+            </kbd>{' '}
+            לשליחה
+          </p>
+        </div>
+
+        {error && (
+          <div className="shrink-0">
+            <Alert variant="error" title="שגיאה">
+              {error}
+            </Alert>
+          </div>
+        )}
+
+        {showLoadingSkeleton && (
+          <div className="min-h-0 shrink-0 rounded-xl border border-slate-700 bg-card p-5">
+            <ResponseScrollArea>
+              <ResponseSkeleton />
+            </ResponseScrollArea>
+          </div>
+        )}
+
+        {hasResponse && (
+          <div className="flex min-h-0 shrink-0 flex-col rounded-xl border border-accent/50 bg-card">
+            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-700 p-5 pb-3">
+              {selectedLabel && (
+                <p className="text-sm font-medium text-white">{selectedLabel}</p>
+              )}
+              <span className="shrink-0 rounded-full bg-accent/20 px-2.5 py-0.5 text-xs font-semibold text-accent">
+                AI
+              </span>
+            </div>
+
+            <ResponseScrollArea>
+              <div className="px-5 pb-2">
+                <div className="whitespace-pre-wrap text-sm leading-[1.8] text-slate-200">
+                  {response}
+                  {loading && (
+                    <span className="mr-1 inline-block h-4 w-1 animate-pulse bg-accent" />
+                  )}
+                </div>
+              </div>
+            </ResponseScrollArea>
+
+            <p className="shrink-0 px-5 pb-5 text-xs text-slate-500">
+              המידע הוא לצורך עזר בלבד
+            </p>
           </div>
         )}
       </div>
-
-      <div className="space-y-1.5">
-        <div className="flex items-center gap-2">
-          <div className="relative min-w-0 flex-1">
-            <MessageSquare className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-            <textarea
-              value={freeText}
-              onChange={(e) => setFreeText(e.target.value)}
-              onKeyDown={handleFreeTextKeyDown}
-              rows={2}
-              aria-label="שאלה חופשית על המצב הפיננסי"
-              placeholder="שאל שאלה חופשית על המצב הפיננסי שלך..."
-              disabled={loading}
-              className="min-h-11 w-full resize-none rounded-xl border border-slate-700 bg-card py-2.5 pl-3 pr-10 text-sm leading-relaxed text-white outline-none transition-colors placeholder:text-slate-500 focus:border-accent disabled:opacity-50"
-            />
-          </div>
-          <button
-            type="button"
-            onClick={handleFreeTextSubmit}
-            disabled={loading || !freeText.trim()}
-            aria-label="שלח שאלה"
-            className="flex h-11 w-11 shrink-0 items-center justify-center self-center rounded-xl bg-accent text-white transition-colors hover:bg-accent/80 disabled:opacity-50"
-          >
-            {loading && !selectedTemplateId ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <Send className="h-5 w-5" />
-            )}
-          </button>
-        </div>
-        <p className="text-xs text-slate-500">
-          <kbd className="rounded border border-slate-600 bg-slate-800 px-1.5 py-0.5 font-mono text-[10px]">
-            Ctrl+Enter
-          </kbd>{' '}
-          לשליחה
-        </p>
-      </div>
-
-      {error && (
-        <Alert variant="error" title="שגיאה">
-          {error}
-        </Alert>
-      )}
-
-      {showResponse && (
-        <div className="rounded-xl border border-accent/50 bg-card p-5">
-          <div className="mb-4 flex items-center justify-between gap-3 border-b border-slate-700 pb-3">
-            {selectedLabel && (
-              <p className="text-sm font-medium text-white">{selectedLabel}</p>
-            )}
-            <span className="shrink-0 rounded-full bg-accent/20 px-2.5 py-0.5 text-xs font-semibold text-accent">
-              AI
-            </span>
-          </div>
-
-          {loading && !text ? (
-            <ResponseSkeleton />
-          ) : (
-            <div className="whitespace-pre-wrap text-sm leading-[1.8] text-slate-200">
-              {text}
-              {loading && (
-                <span className="mr-1 inline-block h-4 w-1 animate-pulse bg-accent" />
-              )}
-            </div>
-          )}
-
-          <p className="mt-4 text-xs text-slate-500">
-            המידע הוא לצורך עזר בלבד
-          </p>
-        </div>
-      )}
-
     </section>
   );
 }
