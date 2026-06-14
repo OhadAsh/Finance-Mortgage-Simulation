@@ -59,7 +59,7 @@ src/
   hooks/
 
 ## AI integration
-- The Anthropic API call must always use model "claude-sonnet-4-6".
+- The Anthropic API call must always use model "openai/gpt-oss-120b:free".
 - API key must only be read from localStorage — never hardcoded, never in env files.
 - Always handle: loading state, error state, empty state in InsightsPanel.
 - The AI prompt must include the full financial state as structured JSON.

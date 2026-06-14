@@ -181,7 +181,7 @@ export function InsightsPanel({ onRequestApiKey, onApiKeyUnauthorized }: Insight
           )}
 
           <p className="mt-4 text-xs text-slate-500">
-            נוצר על ידי Claude · המידע הוא לצורך עזר בלבד
+            המידע הוא לצורך עזר בלבד
           </p>
         </div>
       )}
