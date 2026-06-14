@@ -57,6 +57,7 @@ export function AssetTable() {
               <th className="px-3 py-3">ברוטו</th>
               <th className="px-3 py-3">מס%</th>
               <th className="px-3 py-3">נטו</th>
+              <th className="px-3 py-3">נטו ידני</th>
               <th className="px-3 py-3">נזילות</th>
               <th className="px-3 py-3 w-10"></th>
             </tr>
@@ -78,6 +79,7 @@ export function AssetTable() {
               <td className="px-3 py-3 font-mono text-sm text-accent">
                 {formatCurrency(totalNet(assets))}
               </td>
+              <td className="px-3 py-3"></td>
               <td className="px-3 py-3 font-mono text-sm text-amber">
                 {formatCurrency(totalLiquidNet(assets))}
               </td>

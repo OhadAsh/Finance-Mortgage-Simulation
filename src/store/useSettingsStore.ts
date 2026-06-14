@@ -90,7 +90,7 @@ export const useSettingsStore = create<SettingsState>()(
     {
       name: 'settings-store',
       storage: createJSONStorage(() => createVersionedLocalStorage()),
-      version: 7,
+      version: 9,
       migrate: (persistedState) => {
         const state = persistedState as Partial<SettingsState & LegacySettings> | undefined;
         const raw = state?.scenarios;

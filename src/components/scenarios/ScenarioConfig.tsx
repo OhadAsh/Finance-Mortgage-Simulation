@@ -1,5 +1,6 @@
 import type { ScenarioConfig } from '../../types';
 import { MAX_SCENARIO_MONTH } from '../../lib/constants';
+import { formatCurrency } from '../../lib/utils';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import { NumberField } from '../ui/NumberField';
 
@@ -18,6 +19,10 @@ function FieldLabel({ children, hint }: { children: string; hint?: string }) {
 
 export function ScenarioConfigPanel({ scenario }: ScenarioConfigPanelProps) {
   const updateScenario = useSettingsStore((s) => s.updateScenario);
+
+  const income1 = scenario.incomeSource1Active ? scenario.incomeSource1 : 0;
+  const computedSavings =
+    income1 + scenario.incomeSource2 - scenario.monthlyExpenses - scenario.currentRent;
 
   return (
     <div className="flex flex-col gap-4">
@@ -101,6 +106,24 @@ export function ScenarioConfigPanel({ scenario }: ScenarioConfigPanelProps) {
               onChange={(val) => updateScenario(scenario.id, { currentRent: val })}
             />
           </label>
+        </div>
+      </div>
+
+      <div className="w-full space-y-1 rounded-xl border border-slate-700 bg-slate-800/40 p-4">
+        <p className="text-sm font-medium text-white">חיסכון חודשי מחושב</p>
+        <p className="text-xs text-slate-500">הכנסות פחות הוצאות ושכירות</p>
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-slate-600 bg-slate-800 px-3 py-2">
+          <p className="text-xs text-slate-500">
+            {formatCurrency(income1)} + {formatCurrency(scenario.incomeSource2)} −{' '}
+            {formatCurrency(scenario.monthlyExpenses)} − {formatCurrency(scenario.currentRent)}
+          </p>
+          <p
+            className={`shrink-0 font-semibold ${
+              computedSavings >= 0 ? 'text-accent' : 'text-danger'
+            }`}
+          >
+            {formatCurrency(computedSavings)}
+          </p>
         </div>
       </div>
     </div>

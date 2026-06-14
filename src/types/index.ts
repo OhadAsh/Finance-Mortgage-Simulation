@@ -8,6 +8,7 @@ export interface Asset {
   taxRate: number;
   liquidity: LiquidityStatus;
   notes?: string;
+  netOverride?: number;
 }
 
 export interface MortgageParams {

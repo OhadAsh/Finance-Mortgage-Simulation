@@ -9,7 +9,10 @@ import {
 } from './constants';
 
 export function netAssetValue(asset: Asset): number {
-  return asset.grossAmount * (1 - asset.taxRate);
+  if (asset.netOverride && asset.netOverride > 0) {
+    return asset.netOverride;
+  }
+  return Math.round(asset.grossAmount * (1 - asset.taxRate));
 }
 
 export function totalGross(assets: Asset[]): number {
@@ -108,16 +111,22 @@ export function formatMonthLabel(monthIndex: number): string {
   return `${HEBREW_MONTHS[month]} ${shortYear}`;
 }
 
-function getMonthlyIncome(scenario: ScenarioConfig, monthIndex: number): number {
-  let income = 0;
+function getMonthlySavings(
+  scenario: ScenarioConfig,
+  monthIndex: number,
+  isPostEntry: boolean,
+): number {
+  const income1 =
+    scenario.incomeSource1Active && monthIndex >= scenario.incomeSource1StartMonth
+      ? scenario.incomeSource1
+      : 0;
 
-  if (scenario.incomeSource1Active && monthIndex >= scenario.incomeSource1StartMonth) {
-    income += scenario.incomeSource1;
-  }
-
-  income += scenario.incomeSource2;
-
-  return income;
+  return (
+    income1 +
+    scenario.incomeSource2 -
+    scenario.monthlyExpenses -
+    (isPostEntry ? 0 : scenario.currentRent)
+  );
 }
 
 export function runSimulation(
@@ -137,13 +146,13 @@ export function runSimulation(
   const monthCount = Math.max(SIMULATION_MONTHS, mortgage.entryMonthOffset + POST_ENTRY_BUFFER_MONTHS);
 
   for (let m = 0; m < monthCount; m++) {
-    cashPool += getMonthlyIncome(scenario, m);
+    const isPostEntry = m >= mortgage.entryMonthOffset;
+    const monthlySavings = getMonthlySavings(scenario, m, isPostEntry);
 
-    if (m < mortgage.entryMonthOffset) {
-      cashPool -= scenario.monthlyExpenses + scenario.currentRent;
-    } else if (m === mortgage.entryMonthOffset) {
+    cashPool += monthlySavings;
+
+    if (m === mortgage.entryMonthOffset) {
       cashPool -= entryPayment;
-      cashPool -= scenario.monthlyExpenses;
       mortgageMonthsElapsed = 1;
       mortgageBalance = remainingBalance(
         principal,
@@ -152,7 +161,7 @@ export function runSimulation(
         mortgageMonthsElapsed,
       );
       cashPool -= payment;
-    } else {
+    } else if (m > mortgage.entryMonthOffset) {
       mortgageMonthsElapsed += 1;
       mortgageBalance = remainingBalance(
         principal,
@@ -160,7 +169,7 @@ export function runSimulation(
         mortgage.termYears,
         mortgageMonthsElapsed,
       );
-      cashPool -= scenario.monthlyExpenses + payment;
+      cashPool -= payment;
     }
 
     const propertyValue =
