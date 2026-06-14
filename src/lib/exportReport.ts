@@ -242,7 +242,7 @@ function buildReportHtml(snapshot: ExportSnapshot): string {
     .join('');
 
   const assetsChart = buildLineChartSvg(snapshot.chartData, [
-    { key: 'totalAssets', color: '#10b981', label: 'סה״כ נכסים' },
+    { key: 'cashBalance', color: '#10b981', label: 'יתרת נזילות' },
     { key: 'mortgageBalance', color: '#ef4444', label: 'יתרת משכנתא' },
   ]);
 

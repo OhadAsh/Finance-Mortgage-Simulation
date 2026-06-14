@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import {
   AreaChart,
   Area,
@@ -7,6 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
+  ReferenceLine,
 } from 'recharts';
 import type { ChartPoint } from '../../types';
 import { formatCurrency } from '../../lib/format';
@@ -15,10 +17,8 @@ interface MainChartProps {
   data: ChartPoint[];
 }
 
-interface TooltipPayload {
-  value: number;
-  name: string;
-  color: string;
+function findEntryMonthLabel(data: ChartPoint[]): string | undefined {
+  return data.find((point) => point.mortgageBalance > 0)?.month;
 }
 
 function CustomTooltip({
@@ -27,39 +27,37 @@ function CustomTooltip({
   label,
 }: {
   active?: boolean;
-  payload?: TooltipPayload[];
+  payload?: { payload: ChartPoint }[];
   label?: string;
 }) {
-  if (!active || !payload?.length) return null;
+  if (!active || !payload?.[0]) return null;
+
+  const point = payload[0].payload;
 
   return (
     <div className="rounded-lg border border-slate-600 bg-card p-3 shadow-xl">
       <p className="mb-2 text-sm font-medium text-white">{label}</p>
-      {payload.map((entry) => (
-        <p key={entry.name} className="text-sm" style={{ color: entry.color }}>
-          {entry.name}: {formatCurrency(entry.value)}
-        </p>
-      ))}
+      <p className="text-sm text-accent">
+        יתרת מזומן: {formatCurrency(point.cashBalance)}
+      </p>
+      <p className="text-sm text-danger">
+        יתרת משכנתא: {formatCurrency(point.mortgageBalance)}
+      </p>
+      <p className="text-sm text-violet-400">
+        שווי נטו כולל דירה: {formatCurrency(point.liquidNetEquity)}
+      </p>
     </div>
   );
 }
 
 export function MainChart({ data }: MainChartProps) {
+  const entryMonthLabel = useMemo(() => findEntryMonthLabel(data), [data]);
+
   return (
     <div className="rounded-xl border border-slate-700 bg-card p-4">
-      <h3 className="mb-4 text-sm font-medium text-slate-300">נכסים מול יתרת משכנתא</h3>
+      <h3 className="mb-4 text-sm font-medium text-slate-300">נזילות מול יתרת משכנתא</h3>
       <ResponsiveContainer width="100%" height={300}>
-        <AreaChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
-          <defs>
-            <linearGradient id="assetsGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
-            </linearGradient>
-            <linearGradient id="mortgageGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#EF4444" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="#EF4444" stopOpacity={0} />
-            </linearGradient>
-          </defs>
+        <AreaChart data={data} margin={{ top: 28, right: 10, left: 10, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
           <XAxis
             dataKey="month"
@@ -68,28 +66,58 @@ export function MainChart({ data }: MainChartProps) {
           />
           <YAxis
             tick={{ fill: '#94a3b8', fontSize: 11 }}
-            tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}K`}
+            tickFormatter={(v: number) => `₪${Math.abs(v / 1000).toFixed(0)}K`}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Legend
-            formatter={(value: string) =>
-              value === 'totalAssets' ? 'סה״כ נכסים' : 'יתרת משכנתא'
-            }
-          />
+          <Legend />
+          <ReferenceLine y={0} stroke="#ffffff20" />
+          {entryMonthLabel && (
+            <ReferenceLine
+              x={entryMonthLabel}
+              stroke="#f59e0b"
+              strokeDasharray="4 4"
+              label={{
+                value: 'כניסה לדירה',
+                position: 'top',
+                fill: '#f59e0b',
+                fontSize: 11,
+              }}
+            />
+          )}
           <Area
-            type="monotone"
-            dataKey="totalAssets"
-            stroke="#10B981"
-            fill="url(#assetsGradient)"
+            dataKey="cashBalance"
+            name="יתרת מזומן"
+            stroke="#10b981"
+            fill="#10b981"
+            fillOpacity={0.15}
+            type="linear"
             strokeWidth={2}
+            dot={false}
             animationDuration={800}
           />
           <Area
-            type="monotone"
             dataKey="mortgageBalance"
-            stroke="#EF4444"
-            fill="url(#mortgageGradient)"
+            name="יתרת משכנתא"
+            stroke="#ef4444"
+            fill="#ef4444"
+            fillOpacity={0.1}
+            type="monotone"
             strokeWidth={2}
+            strokeDasharray="5 5"
+            dot={false}
+            animationDuration={800}
+          />
+          <Area
+            dataKey="liquidNetEquity"
+            name="שווי נטו כולל דירה"
+            stroke="#8b5cf6"
+            fill="#8b5cf6"
+            fillOpacity={0.03}
+            strokeOpacity={0.6}
+            type="monotone"
+            strokeWidth={1}
+            strokeDasharray="4 2"
+            dot={false}
             animationDuration={800}
           />
         </AreaChart>

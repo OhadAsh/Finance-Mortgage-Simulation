@@ -1,24 +1,22 @@
+import { useShallow } from 'zustand/react/shallow';
 import {
-  mortgagePrincipal,
-  monthlyPayment,
+  mortgageFigures,
+  remainingLiquidAfterEntry,
   totalEquity,
-  totalLiquidNet,
 } from '../../lib/calculations';
 import { formatCurrency, formatPercent } from '../../lib/format';
-import { useMortgageStore } from '../../store/useMortgageStore';
+import { selectMortgageParams, useMortgageStore } from '../../store/useMortgageStore';
 import { useAssetsStore } from '../../store/useAssetsStore';
 
 export function MortgageSummary() {
-  const mortgage = useMortgageStore();
+  const mortgage = useMortgageStore(useShallow(selectMortgageParams));
   const assets = useAssetsStore((s) => s.assets);
 
   const equity = totalEquity(mortgage);
-  const equityPercent = (equity / mortgage.apartmentValue) * 100;
-  const principal = mortgagePrincipal(mortgage);
-  const payment = monthlyPayment(principal, mortgage.annualRate, mortgage.termYears);
-  const liquidNet = totalLiquidNet(assets);
-  const entryCost = mortgage.dueSoon + mortgage.extraEquity;
-  const remainingLiquid = liquidNet - entryCost;
+  const equityPercent =
+    mortgage.apartmentValue > 0 ? (equity / mortgage.apartmentValue) * 100 : 0;
+  const { principal, monthlyPayment: payment } = mortgageFigures(mortgage);
+  const remainingLiquid = remainingLiquidAfterEntry(assets, mortgage);
 
   type Highlight = 'accent' | 'amber' | 'danger';
 

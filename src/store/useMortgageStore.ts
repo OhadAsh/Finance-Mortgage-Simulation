@@ -10,8 +10,8 @@ const DEFAULT_MORTGAGE: MortgageParams = {
   apartmentValue: 0,
   alreadyPaid: 0,
   dueSoon: 0,
-  alreadyPaidPercent: 0,
-  dueSoonPercent: 0,
+  alreadyPaidPercent: 15,
+  dueSoonPercent: 10,
   alreadyPaidManual: false,
   dueSoonManual: false,
   extraEquity: 0,
@@ -20,21 +20,45 @@ const DEFAULT_MORTGAGE: MortgageParams = {
   entryMonthOffset: 0,
 };
 
+export function selectMortgageParams(state: MortgageParams): MortgageParams {
+  return {
+    apartmentValue: state.apartmentValue,
+    alreadyPaid: state.alreadyPaid,
+    dueSoon: state.dueSoon,
+    alreadyPaidPercent: state.alreadyPaidPercent,
+    dueSoonPercent: state.dueSoonPercent,
+    alreadyPaidManual: state.alreadyPaidManual,
+    dueSoonManual: state.dueSoonManual,
+    extraEquity: state.extraEquity,
+    annualRate: state.annualRate,
+    termYears: state.termYears,
+    entryMonthOffset: state.entryMonthOffset,
+  };
+}
+
+function syncDerivedFields(state: MortgageParams): MortgageParams {
+  const next: MortgageParams = { ...state };
+
+  if (!next.alreadyPaidManual) {
+    next.alreadyPaid = calcFromPercent(next.apartmentValue, next.alreadyPaidPercent);
+  }
+
+  if (!next.dueSoonManual) {
+    next.dueSoon = calcFromPercent(next.apartmentValue, next.dueSoonPercent);
+  }
+
+  return next;
+}
+
 function applyDerivedFields(state: MortgageParams, patch: Partial<MortgageParams>): MortgageParams {
   const next: MortgageParams = { ...state, ...patch };
 
-  if ('apartmentValue' in patch || 'alreadyPaidPercent' in patch) {
-    if (!next.alreadyPaidManual || 'alreadyPaidPercent' in patch) {
-      if ('alreadyPaidPercent' in patch) next.alreadyPaidManual = false;
-      next.alreadyPaid = calcFromPercent(next.apartmentValue, next.alreadyPaidPercent);
-    }
+  if ('alreadyPaidPercent' in patch) {
+    next.alreadyPaidManual = false;
   }
 
-  if ('apartmentValue' in patch || 'dueSoonPercent' in patch) {
-    if (!next.dueSoonManual || 'dueSoonPercent' in patch) {
-      if ('dueSoonPercent' in patch) next.dueSoonManual = false;
-      next.dueSoon = calcFromPercent(next.apartmentValue, next.dueSoonPercent);
-    }
+  if ('dueSoonPercent' in patch) {
+    next.dueSoonManual = false;
   }
 
   if ('alreadyPaid' in patch && !('alreadyPaidManual' in patch)) {
@@ -53,7 +77,7 @@ function applyDerivedFields(state: MortgageParams, patch: Partial<MortgageParams
     next.dueSoon = calcFromPercent(next.apartmentValue, next.dueSoonPercent);
   }
 
-  return next;
+  return syncDerivedFields(next);
 }
 
 interface MortgageState extends MortgageParams {
@@ -74,8 +98,20 @@ export const useMortgageStore = create<MortgageState>()(
     {
       name: 'mortgage-store',
       storage: createJSONStorage(() => localStorage),
-      version: 5,
-      migrate: () => applyDerivedFields(DEFAULT_MORTGAGE, {}),
+      version: 6,
+      migrate: (persistedState) =>
+        syncDerivedFields({
+          ...DEFAULT_MORTGAGE,
+          ...(persistedState as Partial<MortgageParams>),
+        }),
+      merge: (persistedState, currentState) => ({
+        ...currentState,
+        ...(persistedState as Partial<MortgageState>),
+        ...syncDerivedFields({
+          ...DEFAULT_MORTGAGE,
+          ...(persistedState as Partial<MortgageParams>),
+        }),
+      }),
     },
   ),
 );

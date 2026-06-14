@@ -31,6 +31,14 @@ export function totalLiquidNet(assets: Asset[]): number {
   }, 0);
 }
 
+/** Liquid savings remaining after paying entry costs (dueSoon + extraEquity). */
+export function remainingLiquidAfterEntry(
+  assets: Asset[],
+  mortgage: MortgageParams,
+): number {
+  return totalLiquidNet(assets) - mortgage.dueSoon - mortgage.extraEquity;
+}
+
 export function monthlyPayment(
   principal: number,
   annualRate: number,
@@ -72,8 +80,21 @@ export function totalEquity(mortgage: MortgageParams): number {
   return mortgage.alreadyPaid + mortgage.dueSoon + mortgage.extraEquity;
 }
 
+/** mortgageP = apartmentValue − alreadyPaid − dueSoon − extraEquity */
 export function mortgagePrincipal(mortgage: MortgageParams): number {
-  return Math.max(0, mortgage.apartmentValue - totalEquity(mortgage));
+  const { apartmentValue, alreadyPaid, dueSoon, extraEquity } = mortgage;
+  return Math.max(0, apartmentValue - alreadyPaid - dueSoon - extraEquity);
+}
+
+export function mortgageFigures(mortgage: MortgageParams): {
+  principal: number;
+  monthlyPayment: number;
+} {
+  const principal = mortgagePrincipal(mortgage);
+  return {
+    principal,
+    monthlyPayment: monthlyPayment(principal, mortgage.annualRate, mortgage.termYears),
+  };
 }
 
 export function formatMonthLabel(monthIndex: number): string {
@@ -102,14 +123,17 @@ export function runSimulation(
   scenario: ScenarioConfig,
 ): ChartPoint[] {
   const points: ChartPoint[] = [];
-  let cashPool = totalNet(assets);
+  const liquidStart = totalLiquidNet(assets);
+  const illiquidNet = totalNet(assets) - liquidStart;
+  let cashPool = liquidStart;
   const principal = mortgagePrincipal(mortgage);
   const payment = monthlyPayment(principal, mortgage.annualRate, mortgage.termYears);
   const entryPayment = mortgage.dueSoon + mortgage.extraEquity;
   let mortgageMonthsElapsed = 0;
   let mortgageBalance = 0;
+  const monthCount = Math.max(SIMULATION_MONTHS, mortgage.entryMonthOffset + 12);
 
-  for (let m = 0; m < SIMULATION_MONTHS; m++) {
+  for (let m = 0; m < monthCount; m++) {
     cashPool += getMonthlyIncome(scenario, m);
 
     if (m < mortgage.entryMonthOffset) {
@@ -138,8 +162,9 @@ export function runSimulation(
 
     const propertyValue =
       m >= mortgage.entryMonthOffset ? mortgage.apartmentValue : 0;
-    const totalAssets = cashPool + propertyValue;
+    const totalAssets = cashPool + illiquidNet + propertyValue;
     const netEquity = totalAssets - mortgageBalance;
+    const liquidNetEquity = cashPool + propertyValue - mortgageBalance;
     const ltv =
       mortgage.apartmentValue > 0
         ? (mortgageBalance / mortgage.apartmentValue) * 100
@@ -148,8 +173,10 @@ export function runSimulation(
     points.push({
       month: formatMonthLabel(m),
       totalAssets,
+      cashBalance: cashPool,
       mortgageBalance,
       netEquity,
+      liquidNetEquity,
       ltv,
     });
   }
@@ -166,7 +193,7 @@ export function findCashTrough(points: ChartPoint[]): CashTrough {
   for (let i = 1; i < points.length; i++) {
     const current = points[i];
     const min = points[minIndex];
-    if (current && min && current.totalAssets < min.totalAssets) {
+    if (current && min && current.cashBalance < min.cashBalance) {
       minIndex = i;
     }
   }
@@ -174,7 +201,7 @@ export function findCashTrough(points: ChartPoint[]): CashTrough {
   const trough = points[minIndex];
   return {
     month: trough?.month ?? '',
-    value: trough?.totalAssets ?? 0,
+    value: trough?.cashBalance ?? 0,
     monthIndex: minIndex,
   };
 }

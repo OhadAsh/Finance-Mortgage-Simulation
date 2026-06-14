@@ -30,7 +30,7 @@ function CustomTooltip({
     <div className="rounded-lg border border-slate-600 bg-card p-3 shadow-xl">
       <p className="text-sm font-medium text-white">{label}</p>
       <p className="text-sm text-accent">
-        הון עצמי נטו: {formatCurrency(payload[0].value)}
+        יתרת מזומן: {formatCurrency(payload[0].value)}
       </p>
     </div>
   );
@@ -39,7 +39,7 @@ function CustomTooltip({
 export function EquityChart({ data }: EquityChartProps) {
   return (
     <div className="rounded-xl border border-slate-700 bg-card p-4">
-      <h3 className="mb-4 text-sm font-medium text-slate-300">הון עצמי נטו לאורך זמן</h3>
+      <h3 className="mb-4 text-sm font-medium text-slate-300">יתרת מזומן לאורך זמן</h3>
       <ResponsiveContainer width="100%" height={250}>
         <BarChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
@@ -53,11 +53,11 @@ export function EquityChart({ data }: EquityChartProps) {
             tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}K`}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Bar dataKey="netEquity" radius={[4, 4, 0, 0]} animationDuration={800}>
+          <Bar dataKey="cashBalance" radius={[4, 4, 0, 0]} animationDuration={800}>
             {data.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}
-                fill={entry.netEquity >= 0 ? '#10B981' : '#EF4444'}
+                fill={entry.cashBalance >= 0 ? '#10B981' : '#EF4444'}
               />
             ))}
           </Bar>

@@ -38,8 +38,10 @@ export interface ScenarioConfig {
 export interface ChartPoint {
   month: string;
   totalAssets: number;
+  cashBalance: number;
   mortgageBalance: number;
   netEquity: number;
+  liquidNetEquity: number;
   ltv: number;
 }
 
