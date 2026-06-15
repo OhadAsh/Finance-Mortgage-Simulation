@@ -1,10 +1,18 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { Asset, LiquidityStatus } from '../types';
+import { clampNetOverride } from '../lib/calculations';
 import { createVersionedLocalStorage } from '../lib/persistStorage';
 
 function generateId(): string {
   return crypto.randomUUID();
+}
+
+function clampAsset(asset: Asset): Asset {
+  return {
+    ...asset,
+    netOverride: clampNetOverride(asset),
+  };
 }
 
 const DEFAULT_ASSETS: Asset[] = [];
@@ -26,12 +34,14 @@ export const useAssetsStore = create<AssetsState>()(
 
       addAsset: (asset) =>
         set((state) => ({
-          assets: [...state.assets, { ...asset, id: generateId() }],
+          assets: [...state.assets, clampAsset({ ...asset, id: generateId() })],
         })),
 
       updateAsset: (id, patch) =>
         set((state) => ({
-          assets: state.assets.map((a) => (a.id === id ? { ...a, ...patch } : a)),
+          assets: state.assets.map((a) =>
+            a.id === id ? clampAsset({ ...a, ...patch }) : a,
+          ),
         })),
 
       removeAsset: (id) =>
@@ -46,7 +56,10 @@ export const useAssetsStore = create<AssetsState>()(
 
       importFromCsv: (assets, mode) =>
         set((state) => ({
-          assets: mode === 'replace' ? assets : [...state.assets, ...assets],
+          assets:
+            mode === 'replace'
+              ? assets.map(clampAsset)
+              : [...state.assets, ...assets.map(clampAsset)],
         })),
 
       reset: () => set({ assets: [] }),
@@ -54,8 +67,13 @@ export const useAssetsStore = create<AssetsState>()(
     {
       name: 'assets-store',
       storage: createJSONStorage(() => createVersionedLocalStorage()),
-      version: 5,
-      migrate: () => ({ assets: [] }),
+      version: 6,
+      migrate: (persistedState) => {
+        const state = persistedState as { assets?: Asset[] } | undefined;
+        return {
+          assets: (state?.assets ?? []).map(clampAsset),
+        };
+      },
     },
   ),
 );

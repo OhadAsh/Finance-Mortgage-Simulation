@@ -19,6 +19,7 @@ interface SettingsState {
   setScenario: (id: 'a' | 'b' | 'c') => void;
   updateScenario: (id: 'a' | 'b' | 'c', patch: Partial<ScenarioConfig>) => void;
   resetScenarios: () => void;
+  resetAll: () => void;
 }
 
 interface LegacySettings {
@@ -113,6 +114,13 @@ export const useSettingsStore = create<SettingsState>()(
         })),
 
       resetScenarios: () => set({ scenarios: { ...SCENARIO_DEFAULTS } }),
+
+      resetAll: () =>
+        set({
+          openRouterApiKey: null,
+          activeScenario: 'a',
+          scenarios: { ...SCENARIO_DEFAULTS },
+        }),
     }),
     {
       name: 'settings-store',

@@ -1,11 +1,9 @@
-import { TrendingUp, Percent, BarChart3 } from 'lucide-react';
+import { TrendingUp, BarChart3 } from 'lucide-react';
 import { useSettingsStore } from '../../store/useSettingsStore';
-import { LTV_GOOD_MAX, LTV_WARN_MAX } from '../../lib/constants';
-import { formatCurrency, formatPercent } from '../../lib/utils';
+import { formatCurrency } from '../../lib/utils';
 import { MetricCard } from '../ui/MetricCard';
 
 interface SidebarProps {
-  ltv: number;
   netEquity: number;
   savingsNet: number;
   entryMonthLabel: string;
@@ -17,7 +15,7 @@ const scenarioBadgeColors: Record<'a' | 'b' | 'c', string> = {
   c: 'text-danger',
 };
 
-export function Sidebar({ ltv, netEquity, savingsNet, entryMonthLabel }: SidebarProps) {
+export function Sidebar({ netEquity, savingsNet, entryMonthLabel }: SidebarProps) {
   const activeScenario = useSettingsStore((s) => s.activeScenario);
   const scenarios = useSettingsStore((s) => s.scenarios);
   const scenario = scenarios[activeScenario];
@@ -30,13 +28,6 @@ export function Sidebar({ ltv, netEquity, savingsNet, entryMonthLabel }: Sidebar
         subtitle={`בכניסה לדירה (${entryMonthLabel}) · מזומן + שווי דירה − משכנתא`}
         icon={<TrendingUp className="h-4 w-4" />}
         variant={netEquity >= 0 ? 'accent' : 'danger'}
-      />
-      <MetricCard
-        title="יחס הלוואה לשווי בכניסה"
-        value={formatPercent(ltv, 0)}
-        subtitle="יתרת משכנתא ÷ שווי דירה"
-        icon={<Percent className="h-4 w-4" />}
-        variant={ltv < LTV_GOOD_MAX ? 'accent' : ltv < LTV_WARN_MAX ? 'amber' : 'danger'}
       />
       <div className="col-span-2 rounded-xl border border-slate-700 bg-card p-4 lg:col-span-1">
         <p className="text-xs text-slate-500">

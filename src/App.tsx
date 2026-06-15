@@ -6,9 +6,9 @@ import { MortgagePanel } from './components/mortgage/MortgagePanel';
 import { ScenarioTabs } from './components/scenarios/ScenarioTabs';
 import { MainChart } from './components/charts/MainChart';
 import { EquityChart } from './components/charts/EquityChart';
-import { LtvGauge } from './components/charts/LtvGauge';
 import { InsightsPanel } from './components/insights/InsightsPanel';
 import { ApiKeyModal } from './components/insights/ApiKeyModal';
+import { DeleteDataModal } from './components/layout/DeleteDataModal';
 import { useSimulation } from './hooks/useSimulation';
 import { useExportReport } from './hooks/useExportReport';
 
@@ -17,6 +17,8 @@ export function App() {
   const { exportXlsx, exportPdf, exporting } = useExportReport();
   const [apiModalOpen, setApiModalOpen] = useState(false);
   const [apiModalError, setApiModalError] = useState<string | null>(null);
+  const [deleteDataModalOpen, setDeleteDataModalOpen] = useState(false);
+  const [insightsResetKey, setInsightsResetKey] = useState(0);
 
   const handleOpenApiModal = (): void => {
     setApiModalError(null);
@@ -32,6 +34,7 @@ export function App() {
     <div className="min-h-screen bg-navy">
       <Header
         onApiKeyClick={handleOpenApiModal}
+        onDeleteDataClick={() => setDeleteDataModalOpen(true)}
         onExportXlsx={exportXlsx}
         onExportPdf={exportPdf}
         exporting={exporting}
@@ -40,7 +43,6 @@ export function App() {
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
         <div className="mb-6 lg:hidden">
           <Sidebar
-            ltv={currentLtv}
             netEquity={netEquity}
             savingsNet={savingsNet}
             entryMonthLabel={entryMonthLabel}
@@ -57,22 +59,21 @@ export function App() {
           <div className="space-y-6 lg:col-span-6">
             <div className="hidden lg:block">
               <Sidebar
-                ltv={currentLtv}
                 netEquity={netEquity}
                 savingsNet={savingsNet}
                 entryMonthLabel={entryMonthLabel}
               />
             </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div className="sm:col-span-2">
-                <MainChart data={chartData} />
-              </div>
-              <LtvGauge value={currentLtv} />
-            </div>
+            <MainChart
+              data={chartData}
+              ltv={currentLtv}
+              entryMonthLabel={entryMonthLabel}
+            />
             <EquityChart data={chartData} />
             <InsightsPanel
               onRequestApiKey={handleOpenApiModal}
               onApiKeyUnauthorized={handleApiKeyUnauthorized}
+              resetKey={insightsResetKey}
             />
           </div>
         </div>
@@ -85,6 +86,12 @@ export function App() {
           setApiModalError(null);
           setApiModalOpen(false);
         }}
+      />
+
+      <DeleteDataModal
+        isOpen={deleteDataModalOpen}
+        onClose={() => setDeleteDataModalOpen(false)}
+        onCleared={() => setInsightsResetKey((key) => key + 1)}
       />
     </div>
   );

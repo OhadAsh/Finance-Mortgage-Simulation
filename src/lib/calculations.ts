@@ -8,11 +8,25 @@ import {
   START_YEAR,
 } from './constants';
 
+export function computedNetAssetValue(asset: Pick<Asset, 'grossAmount' | 'taxRate'>): number {
+  return Math.round(asset.grossAmount * (1 - asset.taxRate));
+}
+
+/** Manual net is capped at gross — it can only reduce tax impact, not exceed the holding value. */
+export function clampNetOverride(
+  asset: Pick<Asset, 'grossAmount' | 'netOverride'>,
+): number | undefined {
+  if (asset.netOverride == null || asset.netOverride <= 0) return undefined;
+  const maxNet = Math.max(0, asset.grossAmount);
+  const clamped = Math.min(asset.netOverride, maxNet);
+  return clamped > 0 ? clamped : undefined;
+}
+
 export function netAssetValue(asset: Asset): number {
   if (asset.netOverride && asset.netOverride > 0) {
     return asset.netOverride;
   }
-  return Math.round(asset.grossAmount * (1 - asset.taxRate));
+  return computedNetAssetValue(asset);
 }
 
 export function totalGross(assets: Asset[]): number {
@@ -35,14 +49,6 @@ export function totalLiquidNet(assets: Asset[]): number {
         return sum;
     }
   }, 0);
-}
-
-/** Liquid savings remaining after paying entry costs (dueSoon + extraEquity). */
-export function remainingLiquidAfterEntry(
-  assets: Asset[],
-  mortgage: MortgageParams,
-): number {
-  return totalLiquidNet(assets) - mortgage.dueSoon - mortgage.extraEquity;
 }
 
 export function monthlyPayment(

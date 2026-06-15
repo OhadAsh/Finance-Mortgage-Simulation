@@ -1,6 +1,7 @@
 import { memo, useState, type ReactElement } from 'react';
 import { Pencil, Trash2, X } from 'lucide-react';
 import type { Asset, LiquidityStatus } from '../../types';
+import { computedNetAssetValue, clampNetOverride } from '../../lib/calculations';
 import { formatCurrency, formatPercent } from '../../lib/utils';
 import { Badge } from '../ui/Badge';
 import { useAssetsStore } from '../../store/useAssetsStore';
@@ -40,7 +41,7 @@ function AssetRowComponent({ asset }: AssetRowProps): ReactElement {
   const [manualValue, setManualValue] = useState('');
 
   const hasNetOverride = asset.netOverride != null && asset.netOverride > 0;
-  const computedNet = Math.round(asset.grossAmount * (1 - asset.taxRate));
+  const computedNet = computedNetAssetValue(asset);
 
   const openManualEdit = (): void => {
     setManualValue(asset.netOverride != null ? String(asset.netOverride) : '');
@@ -54,7 +55,10 @@ function AssetRowComponent({ asset }: AssetRowProps): ReactElement {
     } else {
       const num = parseFloat(raw.replace(/[^\d.-]/g, ''));
       if (!Number.isNaN(num) && num > 0) {
-        updateAsset(asset.id, { netOverride: num });
+        const netOverride = clampNetOverride({ ...asset, netOverride: num });
+        if (netOverride !== undefined) {
+          updateAsset(asset.id, { netOverride });
+        }
       }
     }
     setEditingManual(false);

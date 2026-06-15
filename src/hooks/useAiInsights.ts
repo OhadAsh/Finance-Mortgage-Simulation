@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Asset, ChartPoint, MortgageParams, ScenarioConfig } from '../types';
 import { fetchAiInsights, ApiUnauthorizedError } from '../lib/aiInsights';
 import { useAssetsStore } from '../store/useAssetsStore';
@@ -20,12 +20,26 @@ export interface AiInsightsResult {
   scenario: ScenarioConfig;
 }
 
-export function useAiInsights(onUnauthorized?: (message: string) => void): AiInsightsResult {
+export function useAiInsights(
+  onUnauthorized?: (message: string) => void,
+  resetKey = 0,
+): AiInsightsResult {
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    if (resetKey === 0) return;
+
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setText('');
+    setLoading(false);
+    setError(null);
+    setSelectedLabel(null);
+  }, [resetKey]);
 
   const apiKey = useSettingsStore((s) => s.openRouterApiKey);
   const clearApiKey = useSettingsStore((s) => s.clearApiKey);

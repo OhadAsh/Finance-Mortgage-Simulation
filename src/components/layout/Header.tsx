@@ -1,13 +1,20 @@
-import { Building2, Key, FileSpreadsheet, FileText, Loader2 } from 'lucide-react';
+import { Building2, Key, FileSpreadsheet, FileText, Loader2, Trash2 } from 'lucide-react';
 
 interface HeaderProps {
   onApiKeyClick: () => void;
+  onDeleteDataClick: () => void;
   onExportXlsx: () => void;
   onExportPdf: () => void;
   exporting: boolean;
 }
 
-export function Header({ onApiKeyClick, onExportXlsx, onExportPdf, exporting }: HeaderProps) {
+export function Header({
+  onApiKeyClick,
+  onDeleteDataClick,
+  onExportXlsx,
+  onExportPdf,
+  exporting,
+}: HeaderProps) {
   return (
     <header className="border-b border-slate-700/50 bg-card/50 backdrop-blur-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
@@ -58,6 +65,16 @@ export function Header({ onApiKeyClick, onExportXlsx, onExportPdf, exporting }: 
           >
             <Key className="h-4 w-4" />
             <span className="hidden sm:inline">מפתח ממשק</span>
+          </button>
+          <button
+            type="button"
+            onClick={onDeleteDataClick}
+            aria-label="מחיקת כל הנתונים"
+            title="מחיקת כל הנתונים"
+            className="flex items-center gap-1.5 rounded-lg border border-slate-600 px-3 py-2 text-sm text-slate-300 transition-colors hover:border-danger hover:text-danger"
+          >
+            <Trash2 className="h-4 w-4" />
+            <span className="hidden sm:inline">מחק נתונים</span>
           </button>
         </div>
       </div>

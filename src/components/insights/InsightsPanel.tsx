@@ -1,4 +1,4 @@
-import { useState, type KeyboardEvent, type ReactNode } from 'react';
+import { useEffect, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { Sparkles, Loader2, Key, Send, Bot, MessageSquare } from 'lucide-react';
 import { Alert } from '../ui/Alert';
 import { PromptTemplates } from './PromptTemplates';
@@ -32,9 +32,14 @@ function ResponseScrollArea({ children }: { children: ReactNode }) {
 interface InsightsPanelProps {
   onRequestApiKey: () => void;
   onApiKeyUnauthorized: (message: string) => void;
+  resetKey?: number;
 }
 
-export function InsightsPanel({ onRequestApiKey, onApiKeyUnauthorized }: InsightsPanelProps) {
+export function InsightsPanel({
+  onRequestApiKey,
+  onApiKeyUnauthorized,
+  resetKey = 0,
+}: InsightsPanelProps) {
   const {
     text,
     loading,
@@ -46,10 +51,17 @@ export function InsightsPanel({ onRequestApiKey, onApiKeyUnauthorized }: Insight
     mortgage,
     chartData,
     scenario,
-  } = useAiInsights(onApiKeyUnauthorized);
+  } = useAiInsights(onApiKeyUnauthorized, resetKey);
 
   const [freeText, setFreeText] = useState('');
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (resetKey === 0) return;
+
+    setFreeText('');
+    setSelectedTemplateId(null);
+  }, [resetKey]);
 
   const response = text;
   const hasResponse = response.trim().length > 0;
