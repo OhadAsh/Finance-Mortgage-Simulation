@@ -2,7 +2,12 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { ScenarioConfig } from '../types';
 import { SCENARIO_DEFAULTS } from '../types';
-import { MAX_SCENARIO_MONTH } from '../lib/constants';
+import {
+  MAX_MONTHLY_EXPENSES,
+  MAX_MONTHLY_INCOME,
+  MAX_MONTHLY_RENT,
+  MAX_SCENARIO_MONTH,
+} from '../lib/constants';
 import { createVersionedLocalStorage } from '../lib/persistStorage';
 
 interface SettingsState {
@@ -26,20 +31,40 @@ type LegacyScenario = Partial<ScenarioConfig> & {
   husbandHasIncome?: boolean;
   husbandStartMonth?: number;
   wifeSalaryNet?: number;
+  incomeSource1Active?: boolean;
+  incomeSource1StartMonth?: number;
 };
+
+function clampScenarioFields(scenario: ScenarioConfig): ScenarioConfig {
+  return {
+    ...scenario,
+    incomeSource1: Math.min(Math.max(0, scenario.incomeSource1), MAX_MONTHLY_INCOME),
+    incomeSource2: Math.min(Math.max(0, scenario.incomeSource2), MAX_MONTHLY_INCOME),
+    monthlyExpenses: Math.min(Math.max(0, scenario.monthlyExpenses), MAX_MONTHLY_EXPENSES),
+    currentRent: Math.min(Math.max(0, scenario.currentRent), MAX_MONTHLY_RENT),
+    incomeSource2StartMonth: Math.min(
+      Math.max(0, scenario.incomeSource2StartMonth),
+      MAX_SCENARIO_MONTH,
+    ),
+  };
+}
 
 function normalizeScenario(scenario: LegacyScenario, id: 'a' | 'b' | 'c'): ScenarioConfig {
   const defaults = SCENARIO_DEFAULTS[id];
 
-  const legacyStart = scenario.husbandStartMonth ?? scenario.incomeSource1StartMonth;
+  const legacyStart =
+    scenario.husbandStartMonth ??
+    scenario.incomeSource1StartMonth ??
+    scenario.incomeSource2StartMonth;
   const legacyActive =
+    scenario.incomeSource2Active ??
     scenario.incomeSource1Active ??
     scenario.husbandHasIncome ??
-    (legacyStart === 999 ? false : defaults.incomeSource1Active);
+    (legacyStart === 999 ? false : defaults.incomeSource2Active);
 
-  const startMonth = legacyStart ?? defaults.incomeSource1StartMonth;
+  const startMonth = legacyStart ?? defaults.incomeSource2StartMonth;
 
-  return {
+  return clampScenarioFields({
     ...defaults,
     ...scenario,
     id,
@@ -48,9 +73,11 @@ function normalizeScenario(scenario: LegacyScenario, id: 'a' | 'b' | 'c'): Scena
       scenario.incomeSource1 ?? scenario.husbandSalaryNet ?? defaults.incomeSource1,
     incomeSource2:
       scenario.incomeSource2 ?? scenario.wifeSalaryNet ?? defaults.incomeSource2,
-    incomeSource1Active: legacyActive,
-    incomeSource1StartMonth: legacyActive ? Math.min(Math.max(0, startMonth), MAX_SCENARIO_MONTH) : 0,
-  };
+    incomeSource2Active: legacyActive,
+    incomeSource2StartMonth: legacyActive
+      ? Math.min(Math.max(0, startMonth), MAX_SCENARIO_MONTH)
+      : 0,
+  });
 }
 
 function applyScenarioPreset(scenario: ScenarioConfig, id: 'a' | 'b' | 'c'): ScenarioConfig {
@@ -59,8 +86,8 @@ function applyScenarioPreset(scenario: ScenarioConfig, id: 'a' | 'b' | 'c'): Sce
     ...scenario,
     id,
     label: defaults.label,
-    incomeSource1Active: defaults.incomeSource1Active,
-    incomeSource1StartMonth: defaults.incomeSource1StartMonth,
+    incomeSource2Active: defaults.incomeSource2Active,
+    incomeSource2StartMonth: defaults.incomeSource2StartMonth,
   };
 }
 
@@ -81,7 +108,7 @@ export const useSettingsStore = create<SettingsState>()(
         set((state) => ({
           scenarios: {
             ...state.scenarios,
-            [id]: { ...state.scenarios[id], ...patch },
+            [id]: clampScenarioFields({ ...state.scenarios[id], ...patch }),
           },
         })),
 
@@ -90,7 +117,7 @@ export const useSettingsStore = create<SettingsState>()(
     {
       name: 'settings-store',
       storage: createJSONStorage(() => createVersionedLocalStorage()),
-      version: 9,
+      version: 11,
       migrate: (persistedState) => {
         const state = persistedState as Partial<SettingsState & LegacySettings> | undefined;
         const raw = state?.scenarios;

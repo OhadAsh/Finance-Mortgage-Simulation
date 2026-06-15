@@ -47,14 +47,14 @@ export function App() {
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-          <div className="space-y-6 lg:col-span-5">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-start">
+          <div className="space-y-6 lg:col-span-6">
             <AssetTable />
             <MortgagePanel />
             <ScenarioTabs />
           </div>
 
-          <div className="space-y-6 lg:col-span-7">
+          <div className="space-y-6 lg:col-span-6">
             <div className="hidden lg:block">
               <Sidebar
                 ltv={currentLtv}

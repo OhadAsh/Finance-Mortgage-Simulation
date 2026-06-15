@@ -131,7 +131,7 @@ export function InsightsPanel({ onRequestApiKey, onApiKeyUnauthorized }: Insight
           )}
         </div>
 
-        <div className="shrink-0 space-y-1.5">
+        <div className="shrink-0 space-y-2 overflow-visible">
           <div className="flex items-center gap-2">
             <div className="relative min-w-0 flex-1">
               <MessageSquare className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
@@ -160,11 +160,11 @@ export function InsightsPanel({ onRequestApiKey, onApiKeyUnauthorized }: Insight
               )}
             </button>
           </div>
-          <p className="text-xs text-slate-500">
-            <kbd className="rounded border border-slate-600 bg-slate-800 px-1.5 py-0.5 font-mono text-[10px]">
+          <p className="flex items-center gap-1.5 pb-0.5 text-xs leading-normal text-slate-500">
+            <kbd className="inline-flex items-center rounded border border-slate-600 bg-slate-800 px-1.5 py-1 font-mono text-[10px] leading-none">
               Ctrl+Enter
-            </kbd>{' '}
-            לשליחה
+            </kbd>
+            <span>לשליחה</span>
           </p>
         </div>
 

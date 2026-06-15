@@ -97,9 +97,9 @@ function scenarioRows(scenarios: Record<'a' | 'b' | 'c', ScenarioConfig>): unkno
   const header = [
     'תרחיש',
     'הכנסה ראשית',
-    'ראשית פעילה',
-    'חודש התחלה',
     'הכנסה משנית',
+    'משנית פעילה',
+    'חודש התחלה (משנית)',
     'הוצאות',
     'שכירות',
   ];
@@ -108,9 +108,9 @@ function scenarioRows(scenarios: Record<'a' | 'b' | 'c', ScenarioConfig>): unkno
     return [
       s.label,
       s.incomeSource1,
-      s.incomeSource1Active ? 'כן' : 'לא',
-      s.incomeSource1StartMonth,
       s.incomeSource2,
+      s.incomeSource2Active ? 'כן' : 'לא',
+      s.incomeSource2StartMonth,
       s.monthlyExpenses,
       s.currentRent,
     ];

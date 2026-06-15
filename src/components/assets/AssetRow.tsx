@@ -1,5 +1,5 @@
 import { memo, useState, type ReactElement } from 'react';
-import { Trash2, X } from 'lucide-react';
+import { Pencil, Trash2, X } from 'lucide-react';
 import type { Asset, LiquidityStatus } from '../../types';
 import { formatCurrency, formatPercent } from '../../lib/utils';
 import { Badge } from '../ui/Badge';
@@ -36,9 +36,29 @@ function AssetRowComponent({ asset }: AssetRowProps): ReactElement {
   const setLiquidity = useAssetsStore((s) => s.setLiquidity);
   const [editing, setEditing] = useState<EditableField | null>(null);
   const [editValue, setEditValue] = useState('');
+  const [editingManual, setEditingManual] = useState(false);
+  const [manualValue, setManualValue] = useState('');
 
   const hasNetOverride = asset.netOverride != null && asset.netOverride > 0;
   const computedNet = Math.round(asset.grossAmount * (1 - asset.taxRate));
+
+  const openManualEdit = (): void => {
+    setManualValue(asset.netOverride != null ? String(asset.netOverride) : '');
+    setEditingManual(true);
+  };
+
+  const commitManualEdit = (): void => {
+    const raw = manualValue.trim();
+    if (raw === '') {
+      updateAsset(asset.id, { netOverride: undefined });
+    } else {
+      const num = parseFloat(raw.replace(/[^\d.-]/g, ''));
+      if (!Number.isNaN(num) && num > 0) {
+        updateAsset(asset.id, { netOverride: num });
+      }
+    }
+    setEditingManual(false);
+  };
 
   const startEdit = (field: EditableField): void => {
     setEditing(field);
@@ -98,7 +118,10 @@ function AssetRowComponent({ asset }: AssetRowProps): ReactElement {
       <button
         type="button"
         onClick={() => startEdit(field)}
-        className="w-full text-right text-sm text-slate-200 transition-colors hover:text-accent"
+        title={field === 'name' ? asset.name : undefined}
+        className={`text-right text-xs text-slate-200 transition-colors hover:text-accent ${
+          field === 'name' ? 'block w-full truncate' : 'inline whitespace-nowrap'
+        }`}
       >
         {display}
       </button>
@@ -107,64 +130,75 @@ function AssetRowComponent({ asset }: AssetRowProps): ReactElement {
 
   return (
     <tr className={`border-b border-slate-700/50 border-r-4 ${liquidityRowColors[asset.liquidity]}`}>
-      <td className="px-3 py-2">{renderCell('name', asset.name)}</td>
-      <td className="px-3 py-2">{renderCell('owner', asset.owner)}</td>
-      <td className="px-3 py-2 font-mono">{renderCell('grossAmount', formatCurrency(asset.grossAmount))}</td>
-      <td className="px-3 py-2 font-mono">{renderCell('taxRate', formatPercent(asset.taxRate * 100, 0))}</td>
-      <td className="px-3 py-2 font-mono">
-        {hasNetOverride ? (
-          <span
-            title="ערך נטו ידני — מחליף את החישוב האוטומטי"
-            className="inline-flex items-center gap-1.5 text-accent"
-          >
-            {formatCurrency(asset.netOverride!)}
-            <span className="inline-flex items-center rounded-full border border-blue-400/30 bg-blue-400/10 px-1.5 py-0.5 text-[10px] font-medium text-blue-400">
-              ידני
-            </span>
-          </span>
-        ) : (
-          <span className="text-slate-400">{formatCurrency(computedNet)}</span>
-        )}
+      <td className="px-2 py-1.5">{renderCell('name', asset.name)}</td>
+      <td className="px-2 py-1.5">{renderCell('owner', asset.owner)}</td>
+      <td className="whitespace-nowrap px-2 py-1.5 font-mono text-xs">
+        {renderCell('grossAmount', formatCurrency(asset.grossAmount))}
       </td>
-      <td className="px-3 py-2">
-        <div className="flex items-center gap-1">
-          <div className="relative min-w-[8rem] flex-1">
-            <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-500">
-              ₪
-            </span>
+      <td className="whitespace-nowrap px-2 py-1.5 font-mono text-xs">
+        {renderCell('taxRate', formatPercent(asset.taxRate * 100, 0))}
+      </td>
+      <td className="px-2 py-1.5 font-mono text-xs">
+        {editingManual ? (
+          <div className="flex items-center gap-1">
+            <span className="shrink-0 text-[10px] text-slate-500">₪</span>
             <input
+              autoFocus
               type="text"
               inputMode="decimal"
-              placeholder="הכנס נטו אמיתי"
-              value={asset.netOverride ?? ''}
+              value={manualValue}
               aria-label="נטו ידני"
-              onChange={(e) => {
-                const raw = e.target.value;
-                if (raw === '') {
-                  updateAsset(asset.id, { netOverride: undefined });
-                  return;
-                }
-                const num = parseFloat(raw.replace(/[^\d.-]/g, ''));
-                if (!Number.isNaN(num)) {
-                  updateAsset(asset.id, { netOverride: num || undefined });
-                }
+              onChange={(e) => setManualValue(e.target.value)}
+              onBlur={commitManualEdit}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') commitManualEdit();
+                if (e.key === 'Escape') setEditingManual(false);
               }}
-              className="no-spinner w-full rounded-lg border border-slate-600 bg-slate-800 py-1.5 pr-7 pl-2 font-mono text-sm text-white outline-none transition-colors focus:border-accent"
+              className="no-spinner min-w-0 flex-1 rounded border border-accent bg-slate-800 px-1.5 py-0.5 text-xs text-white outline-none"
             />
           </div>
-          {asset.netOverride != null && (
+        ) : (
+          <div className="flex items-center gap-1">
+            <span
+              title={
+                hasNetOverride ? 'ערך נטו ידני — מחליף את החישוב האוטומטי' : undefined
+              }
+              className={`min-w-0 flex-1 whitespace-nowrap ${
+                hasNetOverride ? 'text-accent' : 'text-slate-400'
+              }`}
+            >
+              {formatCurrency(hasNetOverride ? asset.netOverride! : computedNet)}
+              {hasNetOverride && (
+                <span className="mr-1 rounded-full border border-blue-400/30 bg-blue-400/10 px-1 py-0.5 text-[9px] font-medium text-blue-400">
+                  ידני
+                </span>
+              )}
+            </span>
             <button
               type="button"
-              onClick={() => updateAsset(asset.id, { netOverride: undefined })}
-              className="rounded p-1 text-slate-500 transition-colors hover:bg-slate-700 hover:text-slate-300"
-              aria-label="נקה נטו ידני"
+              onClick={openManualEdit}
+              title="ערוך נטו ידני"
+              className={`shrink-0 rounded p-0.5 transition-colors hover:bg-slate-700 ${
+                hasNetOverride ? 'text-accent' : 'text-slate-500 hover:text-slate-300'
+              }`}
+              aria-label="ערוך נטו ידני"
             >
-              <X className="h-3.5 w-3.5" />
+              <Pencil className="h-3 w-3" />
             </button>
-          )}
-        </div>
+            {asset.netOverride != null && (
+              <button
+                type="button"
+                onClick={() => updateAsset(asset.id, { netOverride: undefined })}
+                className="shrink-0 rounded p-0.5 text-slate-500 transition-colors hover:bg-slate-700 hover:text-slate-300"
+                aria-label="נקה נטו ידני"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            )}
+          </div>
+        )}
       </td>
-      <td className="px-3 py-2">
+      <td className="px-2 py-1.5">
         <button
           type="button"
           onClick={cycleLiquidity}
@@ -173,14 +207,14 @@ function AssetRowComponent({ asset }: AssetRowProps): ReactElement {
           <Badge status={asset.liquidity} size="sm" />
         </button>
       </td>
-      <td className="px-3 py-2">
+      <td className="px-2 py-1.5">
         <button
           type="button"
           onClick={() => removeAsset(asset.id)}
-          className="rounded p-1 text-slate-500 transition-colors hover:bg-danger/10 hover:text-danger"
+          className="rounded p-0.5 text-slate-500 transition-colors hover:bg-danger/10 hover:text-danger"
           aria-label="מחק נכס"
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 className="h-3.5 w-3.5" />
         </button>
       </td>
     </tr>

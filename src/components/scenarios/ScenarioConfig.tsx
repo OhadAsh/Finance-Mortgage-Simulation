@@ -1,5 +1,10 @@
 import type { ScenarioConfig } from '../../types';
-import { MAX_SCENARIO_MONTH } from '../../lib/constants';
+import {
+  MAX_MONTHLY_EXPENSES,
+  MAX_MONTHLY_INCOME,
+  MAX_MONTHLY_RENT,
+  MAX_SCENARIO_MONTH,
+} from '../../lib/constants';
 import { formatCurrency } from '../../lib/utils';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import { NumberField } from '../ui/NumberField';
@@ -20,9 +25,9 @@ function FieldLabel({ children, hint }: { children: string; hint?: string }) {
 export function ScenarioConfigPanel({ scenario }: ScenarioConfigPanelProps) {
   const updateScenario = useSettingsStore((s) => s.updateScenario);
 
-  const income1 = scenario.incomeSource1Active ? scenario.incomeSource1 : 0;
+  const income2 = scenario.incomeSource2Active ? scenario.incomeSource2 : 0;
   const computedSavings =
-    income1 + scenario.incomeSource2 - scenario.monthlyExpenses - scenario.currentRent;
+    scenario.incomeSource1 + income2 - scenario.monthlyExpenses - scenario.currentRent;
 
   return (
     <div className="flex flex-col gap-4">
@@ -31,53 +36,55 @@ export function ScenarioConfigPanel({ scenario }: ScenarioConfigPanelProps) {
 
         <div className="grid grid-cols-2 items-end gap-3">
           <label className="flex min-w-0 flex-col gap-2">
-            <FieldLabel hint="יכולה להתחיל בחודש מאוחר">
-              הכנסה ראשית (נטו)
-            </FieldLabel>
+            <FieldLabel>הכנסה ראשית (נטו)</FieldLabel>
             <NumberField
               value={scenario.incomeSource1}
               prefix="₪"
               min={0}
-              disabled={!scenario.incomeSource1Active}
+              max={MAX_MONTHLY_INCOME}
               onChange={(val) => updateScenario(scenario.id, { incomeSource1: val })}
             />
           </label>
 
           <label className="flex min-w-0 flex-col gap-2">
-            <FieldLabel hint="בתוקף מחודש">הכנסה משנית (נטו)</FieldLabel>
+            <FieldLabel hint="יכולה להתחיל בחודש מאוחר">
+              הכנסה משנית (נטו)
+            </FieldLabel>
             <NumberField
               value={scenario.incomeSource2}
               prefix="₪"
               min={0}
+              max={MAX_MONTHLY_INCOME}
+              disabled={!scenario.incomeSource2Active}
               onChange={(val) => updateScenario(scenario.id, { incomeSource2: val })}
             />
           </label>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2 pb-1">
           <label className="flex cursor-pointer items-center gap-2">
             <input
               type="checkbox"
-              checked={scenario.incomeSource1Active}
+              checked={scenario.incomeSource2Active}
               onChange={(e) =>
-                updateScenario(scenario.id, { incomeSource1Active: e.target.checked })
+                updateScenario(scenario.id, { incomeSource2Active: e.target.checked })
               }
               className="h-4 w-4 rounded accent-accent"
             />
-            <span className="text-sm text-slate-300">הכנסה ראשית פעילה</span>
+            <span className="text-sm text-slate-300">הכנסה משנית פעילה</span>
           </label>
 
-          {scenario.incomeSource1Active && (
+          {scenario.incomeSource2Active && (
             <label className="block space-y-2">
-              <FieldLabel hint="0 = מהחודש הראשון בסימולציה">
-                חודש תחילת הכנסה (ראשית)
+              <FieldLabel hint="מספר חודש בסימולציה (0 = ראשון, לא חודש בשנה)">
+                חודש תחילת הכנסה (משנית)
               </FieldLabel>
               <NumberField
-                value={scenario.incomeSource1StartMonth}
+                value={scenario.incomeSource2StartMonth}
                 min={0}
                 max={MAX_SCENARIO_MONTH}
                 onChange={(val) =>
-                  updateScenario(scenario.id, { incomeSource1StartMonth: val })
+                  updateScenario(scenario.id, { incomeSource2StartMonth: val })
                 }
               />
             </label>
@@ -94,6 +101,7 @@ export function ScenarioConfigPanel({ scenario }: ScenarioConfigPanelProps) {
               value={scenario.monthlyExpenses}
               prefix="₪"
               min={0}
+              max={MAX_MONTHLY_EXPENSES}
               onChange={(val) => updateScenario(scenario.id, { monthlyExpenses: val })}
             />
           </label>
@@ -103,6 +111,7 @@ export function ScenarioConfigPanel({ scenario }: ScenarioConfigPanelProps) {
               value={scenario.currentRent}
               prefix="₪"
               min={0}
+              max={MAX_MONTHLY_RENT}
               onChange={(val) => updateScenario(scenario.id, { currentRent: val })}
             />
           </label>
@@ -114,7 +123,7 @@ export function ScenarioConfigPanel({ scenario }: ScenarioConfigPanelProps) {
         <p className="text-xs text-slate-500">הכנסות פחות הוצאות ושכירות</p>
         <div className="flex items-center justify-between gap-3 rounded-lg border border-slate-600 bg-slate-800 px-3 py-2">
           <p className="text-xs text-slate-500">
-            {formatCurrency(income1)} + {formatCurrency(scenario.incomeSource2)} −{' '}
+            {formatCurrency(scenario.incomeSource1)} + {formatCurrency(income2)} −{' '}
             {formatCurrency(scenario.monthlyExpenses)} − {formatCurrency(scenario.currentRent)}
           </p>
           <p

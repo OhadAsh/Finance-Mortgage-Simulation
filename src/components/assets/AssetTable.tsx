@@ -7,6 +7,18 @@ import { AssetRow } from './AssetRow';
 import { AssetTotals } from './AssetTotals';
 import { CsvUpload } from './CsvUpload';
 
+export const COLUMN_WIDTHS = {
+  name: 155,
+  owner: 72,
+  gross: 130,
+  tax: 52,
+  net: 168,
+  liquidity: 100,
+  actions: 40,
+} as const;
+
+export const TABLE_MIN_WIDTH = Object.values(COLUMN_WIDTHS).reduce((sum, w) => sum + w, 0);
+
 export function AssetTable() {
   const assets = useAssetsStore((s) => s.assets);
   const addAsset = useAssetsStore((s) => s.addAsset);
@@ -49,17 +61,25 @@ export function AssetTable() {
       <AssetTotals />
 
       <div className="overflow-x-auto rounded-xl border border-slate-700 bg-card">
-        <table className="w-full">
+        <table className="text-xs" style={{ width: TABLE_MIN_WIDTH }}>
+          <colgroup>
+            <col style={{ width: COLUMN_WIDTHS.name }} />
+            <col style={{ width: COLUMN_WIDTHS.owner }} />
+            <col style={{ width: COLUMN_WIDTHS.gross }} />
+            <col style={{ width: COLUMN_WIDTHS.tax }} />
+            <col style={{ width: COLUMN_WIDTHS.net }} />
+            <col style={{ width: COLUMN_WIDTHS.liquidity }} />
+            <col style={{ width: COLUMN_WIDTHS.actions }} />
+          </colgroup>
           <thead>
-            <tr className="border-b border-slate-700 text-right text-xs text-slate-400">
-              <th className="px-3 py-3">שם</th>
-              <th className="px-3 py-3">בעלים</th>
-              <th className="px-3 py-3">ברוטו</th>
-              <th className="px-3 py-3">מס%</th>
-              <th className="px-3 py-3">נטו</th>
-              <th className="px-3 py-3">נטו ידני</th>
-              <th className="px-3 py-3">נזילות</th>
-              <th className="px-3 py-3 w-10"></th>
+            <tr className="border-b border-slate-700 text-right text-slate-400">
+              <th className="px-2 py-2.5">שם</th>
+              <th className="px-2 py-2.5">בעלים</th>
+              <th className="px-2 py-2.5">ברוטו</th>
+              <th className="px-2 py-2.5">מס%</th>
+              <th className="px-2 py-2.5">נטו</th>
+              <th className="px-2 py-2.5">נזילות</th>
+              <th className="px-2 py-2.5" aria-label="מחק" />
             </tr>
           </thead>
           <tbody>
@@ -69,21 +89,21 @@ export function AssetTable() {
           </tbody>
           <tfoot>
             <tr className="border-t border-slate-600 bg-slate-800/50 font-medium">
-              <td colSpan={2} className="px-3 py-3 text-sm text-slate-300">
+              <td colSpan={2} className="px-2 py-2.5 text-slate-300">
                 סיכום
               </td>
-              <td className="px-3 py-3 font-mono text-sm text-white">
+              <td className="whitespace-nowrap px-2 py-2.5 font-mono text-white">
                 {formatCurrency(totalGross(assets))}
               </td>
-              <td className="px-3 py-3"></td>
-              <td className="px-3 py-3 font-mono text-sm text-accent">
+              <td className="px-2 py-2.5" />
+              <td className="whitespace-nowrap px-2 py-2.5 font-mono text-accent">
                 {formatCurrency(totalNet(assets))}
               </td>
-              <td className="px-3 py-3"></td>
-              <td className="px-3 py-3 font-mono text-sm text-amber">
+              <td className="whitespace-nowrap px-2 py-2.5 font-mono text-amber">
+                <span className="text-slate-500">נזיל </span>
                 {formatCurrency(totalLiquidNet(assets))}
               </td>
-              <td className="px-3 py-3"></td>
+              <td className="px-2 py-2.5" />
             </tr>
           </tfoot>
         </table>

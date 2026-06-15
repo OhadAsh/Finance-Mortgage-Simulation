@@ -116,14 +116,15 @@ function getMonthlySavings(
   monthIndex: number,
   isPostEntry: boolean,
 ): number {
-  const income1 =
-    scenario.incomeSource1Active && monthIndex >= scenario.incomeSource1StartMonth
-      ? scenario.incomeSource1
+  const income1 = scenario.incomeSource1;
+  const income2 =
+    scenario.incomeSource2Active && monthIndex >= scenario.incomeSource2StartMonth
+      ? scenario.incomeSource2
       : 0;
 
   return (
     income1 +
-    scenario.incomeSource2 -
+    income2 -
     scenario.monthlyExpenses -
     (isPostEntry ? 0 : scenario.currentRent)
   );

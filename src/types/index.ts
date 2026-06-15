@@ -29,9 +29,9 @@ export interface ScenarioConfig {
   id: 'a' | 'b' | 'c';
   label: string;
   incomeSource1: number;
-  incomeSource1Active: boolean;
-  incomeSource1StartMonth: number;
   incomeSource2: number;
+  incomeSource2Active: boolean;
+  incomeSource2StartMonth: number;
   monthlyExpenses: number;
   currentRent: number;
 }
@@ -56,9 +56,9 @@ export const SCENARIO_DEFAULTS: Record<'a' | 'b' | 'c', ScenarioConfig> = {
     id: 'a',
     label: 'א׳ — הכנסה מלאה',
     incomeSource1: 0,
-    incomeSource1Active: true,
-    incomeSource1StartMonth: 0,
     incomeSource2: 0,
+    incomeSource2Active: true,
+    incomeSource2StartMonth: 0,
     monthlyExpenses: 0,
     currentRent: 0,
   },
@@ -66,9 +66,9 @@ export const SCENARIO_DEFAULTS: Record<'a' | 'b' | 'c', ScenarioConfig> = {
     id: 'b',
     label: 'ב׳ — הכנסה חלקית',
     incomeSource1: 0,
-    incomeSource1Active: true,
-    incomeSource1StartMonth: 6,
     incomeSource2: 0,
+    incomeSource2Active: true,
+    incomeSource2StartMonth: 6,
     monthlyExpenses: 0,
     currentRent: 0,
   },
@@ -76,9 +76,9 @@ export const SCENARIO_DEFAULTS: Record<'a' | 'b' | 'c', ScenarioConfig> = {
     id: 'c',
     label: 'ג׳ — הכנסה מינימלית',
     incomeSource1: 0,
-    incomeSource1Active: false,
-    incomeSource1StartMonth: 0,
     incomeSource2: 0,
+    incomeSource2Active: false,
+    incomeSource2StartMonth: 0,
     monthlyExpenses: 0,
     currentRent: 0,
   },
