@@ -1,28 +1,34 @@
 import { useEffect, useRef, useState } from 'react';
-import { CHART_ANIMATION_MS, LTV_GOOD_MAX, LTV_WARN_MAX } from '../../lib/constants';
+import { Info } from 'lucide-react';
+import { CHART_ANIMATION_MS, LTV_GOOD_MAX, LTV_PERFECT, LTV_WARN_MAX } from '../../lib/constants';
 import { formatPercent } from '../../lib/utils';
 
 interface LtvBadgeProps {
   value: number;
 }
 
-function getColor(ltv: number): string {
-  if (ltv < LTV_GOOD_MAX) return '#10B981';
-  if (ltv < LTV_WARN_MAX) return '#F59E0B';
-  return '#EF4444';
-}
+const LTV_TOOLTIP = 'בנק ישראל מגביל LTV מקסימלי ל-70% לדירה יחידה';
 
-function getLabel(ltv: number): string {
-  if (ltv < LTV_GOOD_MAX) return 'מצוין';
-  if (ltv < LTV_WARN_MAX) return 'סביר';
-  return 'גבוה';
-}
+type LtvRatingColor = 'green' | 'amber' | 'red';
 
-function getVariantClasses(ltv: number): string {
-  if (ltv < LTV_GOOD_MAX) return 'border-accent/40 bg-accent/10';
-  if (ltv < LTV_WARN_MAX) return 'border-amber/40 bg-amber/10';
-  return 'border-danger/40 bg-danger/10';
-}
+const LTV_COLOR_HEX: Record<LtvRatingColor, string> = {
+  green: '#10B981',
+  amber: '#F59E0B',
+  red: '#EF4444',
+};
+
+const LTV_VARIANT_CLASSES: Record<LtvRatingColor, string> = {
+  green: 'border-accent/40 bg-accent/10',
+  amber: 'border-amber/40 bg-amber/10',
+  red: 'border-danger/40 bg-danger/10',
+};
+
+const getLtvRating = (ltv: number): { label: string; color: LtvRatingColor } => {
+  if (ltv <= LTV_PERFECT) return { label: 'מעולה', color: 'green' };
+  if (ltv <= LTV_GOOD_MAX) return { label: 'טוב', color: 'green' };
+  if (ltv <= LTV_WARN_MAX) return { label: 'סביר (תקרה חוקית)', color: 'amber' };
+  return { label: 'גבוה — לא חוקי לדירה יחידה', color: 'red' };
+};
 
 const RADIUS = 80;
 const STROKE_WIDTH = 12;
@@ -79,14 +85,21 @@ function useAnimatedLtv(value: number): number {
 
 export function LtvBadge({ value }: LtvBadgeProps) {
   const animatedValue = useAnimatedLtv(value);
-  const color = getColor(animatedValue);
-  const label = getLabel(animatedValue);
+  const { label, color: ratingColor } = getLtvRating(animatedValue);
+  const color = LTV_COLOR_HEX[ratingColor];
 
   return (
     <div
-      className={`flex items-center gap-3 rounded-xl border px-3 py-2 sm:px-4 ${getVariantClasses(animatedValue)}`}
+      className={`flex items-center gap-3 rounded-xl border px-3 py-2 sm:px-4 ${LTV_VARIANT_CLASSES[ratingColor]}`}
+      title={LTV_TOOLTIP}
     >
-      <svg width="52" height="40" viewBox="0 0 200 160" className="shrink-0" aria-hidden>
+      <svg
+        width="52"
+        height="40"
+        viewBox="0 0 200 160"
+        className="shrink-0 cursor-help"
+        aria-label={LTV_TOOLTIP}
+      >
         <path
           d={ARC_PATH}
           fill="none"
@@ -107,8 +120,13 @@ export function LtvBadge({ value }: LtvBadgeProps) {
         )}
       </svg>
       <div className="min-w-0">
-        <p className="text-xs text-slate-400">יחס הלוואה לשווי בכניסה</p>
-        <div className="flex items-baseline gap-2">
+        <p className="flex items-center gap-1 text-xs text-slate-400">
+          יחס הלוואה לשווי בכניסה
+          <span className="inline-flex cursor-help" title={LTV_TOOLTIP} aria-label={LTV_TOOLTIP}>
+            <Info className="h-3 w-3 shrink-0 text-slate-500" />
+          </span>
+        </p>
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
           <span className="font-mono text-xl font-bold text-white">
             {formatPercent(animatedValue, 0)}
           </span>

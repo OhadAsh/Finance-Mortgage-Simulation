@@ -19,9 +19,10 @@ export const MAX_MONTHLY_EXPENSES = 50_000;
 /** Max monthly rent (premium TLV 3BR ~₪18K; headroom to ₪25K). */
 export const MAX_MONTHLY_RENT = 25_000;
 
-/** LTV thresholds for gauge and sidebar styling. */
+/** LTV thresholds for gauge styling (Bank of Israel single-dwelling limits). */
+export const LTV_PERFECT = 50;
 export const LTV_GOOD_MAX = 60;
-export const LTV_WARN_MAX = 80;
+export const LTV_WARN_MAX = 70;
 
 /** Semi-liquid assets count at this fraction toward liquid total. */
 export const SEMI_LIQUID_FACTOR = 0.7;
