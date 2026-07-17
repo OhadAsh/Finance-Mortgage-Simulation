@@ -1,6 +1,6 @@
-export const OPENROUTER_MODEL = 'openai/gpt-oss-120b:free';
+export const OPENROUTER_MODEL = 'openai/gpt-oss-20b:free';
 export const OPENROUTER_MODEL_URL =
-  'https://openrouter.ai/openai/gpt-oss-120b:free';
+  'https://openrouter.ai/openai/gpt-oss-20b:free';
 export const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 export class ApiUnauthorizedError extends Error {
