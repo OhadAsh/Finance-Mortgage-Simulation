@@ -33,6 +33,7 @@ export const CHART_ANIMATION_MS = 800;
 /** Remaining liquid below this triggers amber warning in mortgage summary. */
 export const LOW_LIQUID_WARNING = 100_000;
 
-/** Simulation timeline origin. */
-export const START_YEAR = 2026;
-export const START_MONTH = 5;
+/** Simulation timeline origin — current calendar month (0-indexed). */
+const now = new Date();
+export const START_YEAR = now.getFullYear();
+export const START_MONTH = now.getMonth();
