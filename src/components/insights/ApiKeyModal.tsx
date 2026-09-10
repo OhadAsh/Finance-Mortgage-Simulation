@@ -61,7 +61,7 @@ export function ApiKeyModal({ isOpen, onClose, errorMessage }: ApiKeyModalProps)
             {OPENROUTER_MODEL}
             <ExternalLink className="h-3 w-3" />
           </a>
-          <p className="mt-1">חינמי — נדרש חשבון ב-OpenRouter</p>
+          <p className="mt-1">Google Gemma 4 26B (חינמי) — נדרש חשבון ב-OpenRouter</p>
         </div>
 
         <label className="block space-y-2">
